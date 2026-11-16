@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservas · Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <h1 class="page-title">Reservas</h1>
+    <p class="page-sub">Solicitudes recibidas desde el sitio (con o sin cuenta de cliente)</p>
+
+    <div class="filters">
+      <div class="fld"><label for="q">Buscar</label>
+        <input id="q" class="sel" style="min-width:240px;" placeholder="Nombre, correo, celular o JCH-00012"></div>
+      <div class="fld"><label for="filtro">Estado</label>
+        <select id="filtro" class="sel">
+          <option value="">Todas</option><option value="pendiente">Pendientes</option>
+          <option value="confirmado">Confirmadas</option><option value="cancelado">Canceladas</option>
+        </select></div>
+      <div class="fld"><label for="desde">Desde</label><input type="date" id="desde" class="sel" style="color-scheme:dark;"></div>
+      <div class="fld"><label for="hasta">Hasta</label><input type="date" id="hasta" class="sel" style="color-scheme:dark;"></div>
+      <button class="btn btn-ghost" id="btnBuscar">Buscar</button>
+      <button class="btn btn-ghost" id="btnCsv">Exportar CSV</button>
+    </div>
+    <p class="muted" id="resumen" style="margin-bottom:12px;"></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Código</th><th>Recibida</th><th>Cliente</th><th>Contacto</th><th>Plan</th><th>Pers.</th><th>Fecha pref.</th><th>Total</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tbody"><tr><td colspan="10" style="text-align:center;color:var(--text-dim);">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+  let datos = [];
+  const $ = (id) => document.getElementById(id);
+
+  async function cargar() {
+    try {
+      const p = new URLSearchParams();
+      if ($('q').value.trim()) p.set('q', $('q').value.trim());
+      if ($('filtro').value) p.set('estado', $('filtro').value);
+      if ($('desde').value) p.set('desde', $('desde').value);
+      if ($('hasta').value) p.set('hasta', $('hasta').value);
+      datos = await api('/reservas' + (p.toString() ? '?' + p : ''));
+
+      const pendientes = datos.filter((r) => r.estado === 'pendiente').length;
+      const confirmado = datos.filter((r) => r.estado === 'confirmado').reduce((a, r) => a + (r.total || 0), 0);
+      $('resumen').textContent = `${datos.length} reserva(s) · ${pendientes} pendiente(s) · ${money(confirmado)} confirmados`;
+
+      if (!datos.length) { $('tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-dim);">Sin reservas con esos filtros</td></tr>'; return; }
+      $('tbody').innerHTML = datos.map((r) => {
+        const wa = waLink(r.whatsapp, `Hola ${r.nombre_cliente.split(' ')[0]}, te escribimos de Jacha Tours por tu solicitud ${r.codigo} (${r.plan}).`);
+        return `
+        <tr>
+          <td><code>${esc(r.codigo)}</code></td>
+          <td>${fmtDateTime(r.creado_en)}</td>
+          <td><strong>${esc(r.nombre_cliente)}</strong><br>${r.cliente_id ? '<span class="pill cuenta">con cuenta</span>' : '<span class="pill">invitado</span>'}</td>
+          <td style="font-size:.76rem;">
+            ${r.whatsapp ? `${wa ? `<a href="${wa}" target="_blank" rel="noopener" style="color:var(--gold);">📱 ${esc(fmtTel(r.whatsapp))}</a>` : '📱 ' + esc(r.whatsapp)}<br>` : ''}
+            ${r.email ? `✉ ${esc(r.email)}` : ''}
+          </td>
+          <td>${esc(r.plan || '—')}</td>
+          <td>${r.num_personas}</td>
+          <td>${r.fecha_preferida ? fmtDate(r.fecha_preferida) : '—'}</td>
+          <td>${r.total != null ? money(r.total, r.moneda) : '—'}</td>
+          <td><span class="badge ${esc(r.estado)}">${esc(r.estado)}</span></td>
+          <td style="min-width:200px;">
+            <select class="sel" style="min-width:0;padding:6px 8px;font-size:.72rem;" data-estado="${r.id}">
+              ${['pendiente', 'confirmado', 'cancelado'].map((e) => `<option value="${e}" ${r.estado === e ? 'selected' : ''}>${e[0].toUpperCase() + e.slice(1)}</option>`).join('')}
+            </select>
+            <button class="btn btn-ghost btn-sm" data-nota="${r.id}" title="${esc(r.nota_admin || 'Agregar nota interna')}">${r.nota_admin ? '📝' : '＋ Nota'}</button>
+            <button class="btn btn-danger btn-sm" data-del="${r.id}" data-codigo="${esc(r.codigo)}">🗑</button>
+            ${r.comentarios ? `<div class="muted" style="margin-top:6px;max-width:260px;">💬 ${esc(r.comentarios)}</div>` : ''}
+            ${r.nota_admin ? `<div class="muted" style="margin-top:4px;max-width:260px;color:var(--gold);">📝 ${esc(r.nota_admin)}</div>` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (e) { toast(e.message, true); }
+  }
+
+  $('tbody').addEventListener('change', async (ev) => {
+    const sel = ev.target.closest('[data-estado]'); if (!sel) return;
+    try {
+      await api(`/reservas/${sel.dataset.estado}`, { method: 'PUT', body: JSON.stringify({ estado: sel.value }) });
+      toast('Estado actualizado ✓'); cargar();
+    } catch (e) { toast(e.message, true); cargar(); }
+  });
+
+  $('tbody').addEventListener('click', async (ev) => {
+    const del = ev.target.closest('[data-del]');
+    if (del) {
+      if (!confirm(`¿Eliminar la reserva ${del.dataset.codigo}? No se puede deshacer.`)) return;
+      try { await api(`/reservas/${del.dataset.del}`, { method: 'DELETE' }); toast('Reserva eliminada'); cargar(); }
+      catch (e) { toast(e.message, true); }
+      return;
+    }
+    const nb = ev.target.closest('[data-nota]');
+    if (nb) {
+      const r = datos.find((x) => String(x.id) === nb.dataset.nota);
+      const nota = prompt('Nota interna (solo la ve el equipo):', r?.nota_admin || '');
+      if (nota === null) return;
+      try { await api(`/reservas/${nb.dataset.nota}`, { method: 'PUT', body: JSON.stringify({ nota_admin: nota }) }); toast('Nota guardada ✓'); cargar(); }
+      catch (e) { toast(e.message, true); }
+    }
+  });
+
+  $('btnBuscar').onclick = cargar;
+  $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') cargar(); });
+  $('filtro').addEventListener('change', cargar);
+
+  $('btnCsv').onclick = () => {
+    if (!datos.length) return toast('No hay datos para exportar', true);
+    const cols = ['codigo', 'creado_en', 'nombre_cliente', 'whatsapp', 'email', 'plan', 'num_personas', 'fecha_preferida', 'total', 'moneda', 'estado', 'cliente_id', 'comentarios', 'nota_admin'];
+    const csv = '﻿' + cols.join(',') + '\n' + datos.map((r) => cols.map((c) => csvCell(r[c])).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = `reservas_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+  };
+
+  (async () => { try { await requireSession('reservas'); } catch { return; } cargar(); })();
+</script>
+</body>
+</html>

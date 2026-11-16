@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservas · JACHA TOURS</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page-hero { padding: 140px 5vw 72px; background: linear-gradient(180deg, var(--dark) 0%, var(--black) 100%); border-bottom: 1px solid var(--gold-line); position: relative; overflow: hidden; }
+    .page-hero::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+
+    .steps { display:flex; align-items:center; gap:0; margin-bottom:44px; flex-wrap:wrap; row-gap:12px; }
+    .step { display:flex; align-items:center; gap:10px; }
+    .step-num { width:36px; height:36px; border-radius:50%; border:1px solid var(--gold-line); display:flex; align-items:center; justify-content:center; font-size:.68rem; color:var(--text-dim); font-weight:600; transition:var(--tr); }
+    .step.active .step-num { background:var(--gold); color:var(--black); border-color:var(--gold); }
+    .step.done .step-num { background:rgba(201,168,76,.2); color:var(--gold); border-color:rgba(201,168,76,.4); }
+    .step-lbl { font-size:.62rem; color:var(--text-dim); letter-spacing:.14em; text-transform:uppercase; transition:color .25s; }
+    .step.active .step-lbl { color:var(--gold); }
+    .step-conn { width:48px; height:1px; background:var(--gold-line); margin:0 10px; }
+
+    .plans-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; }
+
+    .preview-wrap { display:none; animation:fadeSlide .55s var(--ease) forwards; }
+    @keyframes fadeSlide { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+    .preview-card { background:var(--surface); border:1px solid var(--gold-line); display:grid; grid-template-columns:1.1fr 1fr; overflow:hidden; margin-bottom:3px; }
+    .preview-media { position:relative; min-height:460px; overflow:hidden; }
+    .preview-media img { width:100%; height:100%; object-fit:cover; transition:transform .8s var(--ease); }
+    .preview-card:hover .preview-media img { transform:scale(1.04); }
+    .preview-media-tag { position:absolute; top:22px; left:22px; background:rgba(8,6,7,.85); backdrop-filter:blur(10px); border:1px solid var(--gold-line); color:var(--gold); font-size:.58rem; letter-spacing:.22em; text-transform:uppercase; padding:7px 16px; font-weight:600; }
+    .preview-info { padding:56px 48px; display:flex; flex-direction:column; justify-content:center; }
+    .preview-tier { font-size:.58rem; color:var(--gold); letter-spacing:.28em; text-transform:uppercase; font-weight:600; margin-bottom:8px; }
+    .preview-name { font-family:'Cormorant',serif; font-size:2.8rem; font-weight:400; line-height:1; margin-bottom:8px; }
+    .preview-price { font-family:'Cormorant',serif; font-size:2rem; color:var(--gold); font-weight:600; margin-bottom:28px; }
+    .feature-list { list-style:none; margin-bottom:32px; }
+    .feature-list li { font-size:.86rem; color:var(--text-dim); margin-bottom:14px; display:flex; gap:12px; align-items:flex-start; line-height:1.5; }
+    .feature-list li::before { content:'◆'; color:var(--gold); font-size:.44rem; margin-top:5px; flex-shrink:0; }
+
+    .form-wrap { display:none; animation:fadeSlide .5s var(--ease) forwards; }
+    .form-card { background:var(--surface); border:1px solid var(--gold-line); padding:60px 52px; position:relative; overflow:hidden; }
+    .form-card::before { content:''; position:absolute; top:0;left:0;right:0;height:3px; background:linear-gradient(90deg,var(--gold),var(--gold-pale)); }
+    .form-title { font-family:'Cormorant',serif; font-size:2.4rem; font-weight:400; margin-bottom:6px; }
+    .form-sub { color:var(--text-dim); font-size:.85rem; margin-bottom:42px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+    .form-group { display:flex; flex-direction:column; gap:9px; }
+    .form-group.full { grid-column:span 2; }
+    .form-label { font-size:.58rem; color:var(--gold); letter-spacing:.22em; text-transform:uppercase; font-weight:700; }
+    .form-input { background:rgba(255,255,255,.03); border:none; border-bottom:1px solid var(--gold-line); padding:14px 0; color:var(--text); font-family:'Outfit',sans-serif; font-size:.9rem; font-weight:300; transition:border-color .3s; width:100%; }
+    .form-input:focus { outline:none; border-bottom-color:var(--gold); }
+    .form-input::placeholder { color:rgba(237,232,223,.28); font-size:.82rem; }
+    select.form-input { cursor:pointer; }
+    select.form-input option { background:var(--panel); color:var(--text); }
+    .btn-submit { background:var(--gold); color:var(--black); padding:18px 44px; font-size:.7rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; cursor:pointer; border:none; font-family:'Outfit',sans-serif; transition:var(--tr); width:100%; margin-top:8px; clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%); }
+    .btn-submit:hover { background:var(--gold-bright); transform:translateY(-2px); box-shadow:0 12px 28px rgba(201,168,76,.35); }
+
+    .success-wrap { display:none; text-align:center; padding:90px 20px; animation:fadeSlide .5s var(--ease) forwards; }
+    .success-icon { font-size:3.5rem; color:var(--gold); margin-bottom:22px; }
+    .success-title { font-family:'Cormorant',serif; font-size:3rem; font-weight:400; margin-bottom:16px; }
+    .success-sub { color:var(--text-dim); max-width:420px; margin:0 auto 40px; font-size:.9rem; line-height:1.9; }
+
+    .trust-bar { background:var(--dark); border-top:1px solid var(--gold-line); border-bottom:1px solid var(--gold-line); padding:32px 5vw; }
+    .trust-bar-inner { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap; }
+    .trust-item { display:flex; align-items:center; gap:14px; }
+    .trust-icon { width:42px; height:42px; border:1px solid var(--gold-line); display:flex; align-items:center; justify-content:center; color:var(--gold); font-size:1rem; flex-shrink:0; }
+    .trust-name { font-size:.82rem; font-weight:500; margin-bottom:2px; }
+    .trust-desc { font-size:.7rem; color:var(--text-dim); }
+
+    @media(max-width:960px) {
+      .plans-grid { grid-template-columns:1fr; }
+      .preview-card { grid-template-columns:1fr; }
+      .preview-info { padding:36px 28px; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-group.full { grid-column:span 1; }
+      .form-card { padding:40px 28px; }
+    }
+    @media(max-width:640px) {
+      .page-hero { padding-top:120px; }
+      .steps { gap:0; row-gap:10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cg"></div>
+
+<nav class="nav scrolled" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">JACHA<span class="nav-logo-sep"> · </span>TOURS</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="circuito.html">Circuito</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="experiencia.html">Experiencias</a>
+      <a href="reservas.html" class="active">Reservas</a>
+    </div>
+    <a href="#planes" class="btn btn-gold" style="padding:10px 24px;font-size:.62rem;">Reservar Ahora</a>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">Inicio</a>
+  <a href="circuito.html">Circuito</a>
+  <a href="mapa.html">Mapa</a>
+  <a href="experiencia.html">Experiencias</a>
+  <a href="reservas.html">Reservas</a>
+  <a href="#planes" class="btn btn-gold" style="width:fit-content;margin-top:8px;">Reservar Ahora</a>
+</div>
+
+<!-- ══ PAGE HERO ══ -->
+<div class="page-hero">
+  <div class="steps" id="stepsBar">
+    <div class="step active" id="s1"><div class="step-num">01</div><div class="step-lbl">Elegir Plan</div></div>
+    <div class="step-conn"></div>
+    <div class="step" id="s2"><div class="step-num">02</div><div class="step-lbl">Ver Detalles</div></div>
+    <div class="step-conn"></div>
+    <div class="step" id="s3"><div class="step-num">03</div><div class="step-lbl">Confirmar</div></div>
+  </div>
+  <p class="eyebrow label-line" style="margin-bottom:14px;">Paquetes de Tour</p>
+  <h1 class="section-title" style="font-size:clamp(2.6rem,6vw,4.5rem);">Seleccione su<br><em>Nivel de Inmersión</em></h1>
+</div>
+
+<!-- ══ MAIN ══ -->
+<section class="section" id="planes" style="padding-top:72px;">
+
+  <div class="plans-grid" id="plansGrid">
+    <div class="card plan-card" id="card-silver" onclick="selectPlan('silver',this)" style="cursor:pointer;">
+      <div class="plan-tier">Iniciación</div>
+      <div class="plan-name">Blue Silver</div>
+      <div class="plan-price" data-plan="silver" data-field="precio">Bs. 1.700 <small>/ persona</small></div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Recorrido por las 5 fachadas más icónicas</li>
+        <li>Audioguía técnica sobre arquitectura Neoandina</li>
+        <li>Transporte panorámico con Wi-Fi</li>
+        <li>Fotografía desde puntos estratégicos</li>
+        <li>Guía local bilingüe certificado</li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;pointer-events:none;">Ver Detalles →</button>
+      <div class="plan-bg-num">01</div>
+    </div>
+    <div class="card plan-card featured" id="card-gold" onclick="selectPlan('gold',this)" style="cursor:pointer;">
+      <div class="plan-badge">Más Popular</div>
+      <div class="plan-tier">Experiencia</div>
+      <div class="plan-name">Aurum Gold</div>
+      <div class="plan-price" data-plan="gold" data-field="precio">Bs. 3.800 <small>/ persona</small></div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Acceso exclusivo a Salones de Gala</li>
+        <li>Experiencia de Realidad Aumentada</li>
+        <li>Almuerzo Gourmet en el Cholet</li>
+        <li>Brindis con bebida artesanal andina</li>
+        <li>Transporte privado de lujo</li>
+        <li>Guía especializado en arquitectura</li>
+      </ul>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;pointer-events:none;">Ver Detalles →</button>
+      <div class="plan-bg-num">02</div>
+    </div>
+    <div class="card plan-card" id="card-platinum" onclick="selectPlan('platinum',this)" style="cursor:pointer;">
+      <div class="plan-tier">Distinción</div>
+      <div class="plan-name">Platinum VIP</div>
+      <div class="plan-price" data-plan="platinum" data-field="precio">Bs. 8.300 <small>/ persona</small></div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Acceso privado a Penthouses</li>
+        <li>Charla con maestros constructores</li>
+        <li>Cena privada exclusiva en el Cholet</li>
+        <li>Sesión fotográfica profesional</li>
+        <li>Transporte y seguridad VIP</li>
+        <li>Atención personalizada 24/7</li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;pointer-events:none;">Ver Detalles →</button>
+      <div class="plan-bg-num">03</div>
+    </div>
+  </div>
+
+  <div class="preview-wrap" id="previewWrap" style="margin-top:3px;">
+    <div class="preview-card">
+      <div class="preview-media">
+        <img id="pvImg" src="" alt="Plan">
+        <div class="preview-media-tag" id="pvTag">—</div>
+      </div>
+      <div class="preview-info">
+        <div class="preview-tier" id="pvTier">—</div>
+        <div class="preview-name" id="pvName">—</div>
+        <div class="preview-price" id="pvPrice">—</div>
+        <ul class="feature-list" id="pvFeatures"></ul>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-gold" id="btnConfirm" onclick="showForm()">Confirmar Interés →</button>
+          <button class="btn btn-ghost" onclick="changePlan()">← Cambiar Plan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-wrap" id="formWrap" style="margin-top:3px;">
+    <div class="form-card">
+      <h2 class="form-title">Datos para su Reserva</h2>
+      <p class="form-sub">Le contactaremos por WhatsApp dentro de las próximas 24 horas para confirmar. En este paso no se realiza ningún cobro.</p>
+
+      <div class="f-msg ok" id="sesionInfo"></div>
+      <div class="f-msg err" id="formErr" role="alert"></div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="fNombre">Nombre Completo</label>
+          <input type="text" id="fNombre" class="form-input" maxlength="120" autocomplete="name" placeholder="Su nombre completo" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fWhatsapp">WhatsApp / Celular</label>
+          <input type="tel" id="fWhatsapp" class="form-input" autocomplete="tel" placeholder="7XXXXXXX  (otro país: +54 9 11...)" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fEmail">Correo Electrónico <span style="opacity:.5;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input type="email" id="fEmail" class="form-input" maxlength="120" autocomplete="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fPersonas">Número de Personas</label>
+          <input type="number" id="fPersonas" class="form-input" min="1" max="30" value="2" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fFecha">Fecha Preferida</label>
+          <input type="date" id="fFecha" class="form-input" style="color-scheme:dark;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plan Seleccionado</label>
+          <input type="text" class="form-input" id="planField" readonly style="color:var(--gold);">
+        </div>
+        <div class="form-group full">
+          <label class="form-label" for="fComent">Comentarios Adicionales</label>
+          <input type="text" id="fComent" class="form-input" maxlength="600" placeholder="Hotel donde se hospeda, necesidades especiales, preguntas…">
+        </div>
+        <div class="form-group full">
+          <div id="totalBox" style="border:1px solid var(--gold-line);padding:18px 22px;background:rgba(201,168,76,.05);">
+            <div class="form-label" style="margin-bottom:6px;">Total estimado</div>
+            <div id="totalVal" style="font-family:'Cormorant',serif;font-size:2rem;color:var(--gold);">—</div>
+            <div id="totalUsd" style="font-size:.74rem;color:var(--text-dim);"></div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <button type="button" class="btn-submit" id="btnEnviar" onclick="submitForm()">ENVIAR SOLICITUD DE RESERVA →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-wrap" id="successWrap">
+    <div class="success-icon">✦</div>
+    <h2 class="success-title">¡Solicitud Enviada!</h2>
+    <p class="success-sub">Tu código de reserva es <b id="okCodigo" style="color:var(--gold);font-family:monospace;letter-spacing:.08em;"></b>.<br>
+      <span id="okDetalle"></span><br>Te contactaremos dentro de las próximas 24 horas para confirmar.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a id="okWa" class="btn btn-gold" target="_blank" rel="noopener" style="display:none;">Escribir por WhatsApp</a>
+      <a id="okCuenta" class="btn btn-ghost" href="mi-cuenta.html">Ver mis reservas</a>
+      <a href="index.html" class="btn btn-ghost">← Volver al Inicio</a>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══ TRUST ══ -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-item">
+      <div class="trust-icon">🛡</div>
+      <div><div class="trust-name">Reserva sin cobro previo</div><div class="trust-desc">Pagas al confirmar con nosotros</div></div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">✦</div>
+      <div><div class="trust-name">Guías Certificados</div><div class="trust-desc">Expertos en arquitectura Neoandina</div></div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">🚗</div>
+      <div><div class="trust-name">Transporte Incluido</div><div class="trust-desc">Vehículos privados de lujo</div></div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">★</div>
+      <div><div class="trust-name">+500 Viajeros</div><div class="trust-desc">Satisfacción garantizada</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOOKING BAND ══ -->
+<div class="booking-band">
+  <div>
+    <div class="booking-date-label"><span class="pulse-dot"></span> Próxima Salida Confirmada</div>
+    <div class="booking-date" data-config="fecha">15 Junio, 2026</div>
+<div class="booking-slots" data-config="cupos">Solo quedan 4 cupos disponibles · El Alto</div>
+
+  </div>
+  <a href="#planes" class="btn btn-gold" style="padding:20px 52px;font-size:.75rem;">Asegurar mi Lugar →</a>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">JACHA TOURS</div><p class="footer-tagline">Experiencias de lujo en la capital mundial de la arquitectura Neoandina.</p></div>
+    <div class="footer-col"><h5>Navegación</h5><a href="index.html">Inicio</a><a href="circuito.html">Circuito</a><a href="mapa.html">Mapa</a><a href="experiencia.html">Experiencias</a><a href="reservas.html">Reservas</a></div>
+    <div class="footer-col"><h5>Paquetes</h5><a href="reservas.html">Blue Silver</a><a href="reservas.html">Aurum Gold</a><a href="reservas.html">Platinum VIP</a></div>
+    <div class="footer-col"><h5>Contacto</h5><p>El Alto, Bolivia</p><p data-config="whatsapp">+591 7X XXX XXXX</p><p data-config="email">hola@jachatours.bo</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Jacha Tours Bolivia · Todos los derechos reservados</p>
+    <p>Arquitectura Neoandina · El Alto · Bolivia</p>
+  </div>
+</footer>
+
+<script src="assets/common.js"></script>
+<script>
+  const cg=document.getElementById('cg');
+  window.addEventListener('mousemove',e=>{cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';});
+  const toggle=document.getElementById('navToggle'),drawer=document.getElementById('navDrawer');
+  toggle.addEventListener('click',()=>{toggle.classList.toggle('open');drawer.classList.toggle('open');});
+
+  const J = window.Jacha, Auth = window.JachaAuth;
+  const $ = (id) => document.getElementById(id);
+
+  // Datos de respaldo (si la API no responde). Los precios REALES vienen siempre de la base de datos.
+  const PLANS = {
+    silver:   { tier:'Iniciación',  name:'Blue Silver',  tag:'Fachadas & Exterior',            img:'assets/img/cholets/ingenio.jpg',
+      features:['Recorrido por las 5 fachadas más icónicas','Audioguía técnica sobre arquitectura Neoandina','Transporte panorámico con Wi-Fi','Fotografía desde puntos estratégicos','Guía local bilingüe certificado'] },
+    gold:     { tier:'Experiencia', name:'Aurum Gold',   tag:'Salones & Realidad Aumentada',   img:'assets/img/interiores/salon-gala.jpg',
+      features:['Acceso exclusivo a Salones de Gala','Experiencia de Realidad Aumentada','Almuerzo Gourmet en el Cholet','Brindis con bebida artesanal andina','Transporte privado de lujo','Guía especializado en arquitectura'] },
+    platinum: { tier:'Distinción',  name:'Platinum VIP', tag:'Exclusividad Total',             img:'assets/img/interiores/penthouse.jpg',
+      features:['Acceso privado a Penthouses','Charla con maestros constructores','Cena privada exclusiva en el Cholet','Sesión fotográfica profesional','Transporte y seguridad VIP','Atención personalizada 24/7'] },
+  };
+  let TIPO_CAMBIO = 6.96;
+  let selectedKey = null;
+
+  // ── Cargar planes y configuración reales ──
+  async function cargarDatos() {
+    const [planes, config] = await Promise.all([
+      fetch('/api/planes').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/config').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+    if (config?.tipo_cambio) TIPO_CAMBIO = Number(config.tipo_cambio) || 6.96;
+    if (!planes) return;
+    const vivos = new Set(planes.map(p => p.slug));
+    Object.keys(PLANS).forEach(slug => {
+      const card = $('card-' + slug);
+      if (!vivos.has(slug)) { if (card) card.style.display = 'none'; delete PLANS[slug]; return; }
+      const p = planes.find(x => x.slug === slug);
+      Object.assign(PLANS[slug], { name: p.nombre, tier: p.tier, precio: p.precio, moneda: p.moneda });
+      if (p.features?.length) PLANS[slug].features = p.features;
+      if (!card) return;
+      card.querySelector('.plan-tier').textContent = p.tier || '';
+      card.querySelector('.plan-name').textContent = p.nombre;
+      const ul = card.querySelector('.plan-list');
+      if (ul) ul.innerHTML = PLANS[slug].features.map(f => `<li>${J.esc(f)}</li>`).join('');
+    });
+  }
+
+  function precioTexto(d) { return d.precio != null ? `${J.dinero(d.precio, d.moneda)} / persona` : 'Consultar precio'; }
+
+  function step(n) {
+    [1,2,3].forEach(i => {
+      const el=$('s'+i);
+      el.classList.remove('active','done');
+      if(i<n) el.classList.add('done');
+      if(i===n) el.classList.add('active');
+    });
+  }
+
+  function selectPlan(key, card) {
+    const d = PLANS[key]; if (!d) return;
+    selectedKey = key;
+    document.querySelectorAll('#plansGrid .card').forEach(c=>c.style.outline='none');
+    card.style.outline = '2px solid var(--gold)';
+    $('pvImg').src = d.img;
+    $('pvTag').textContent = d.tag;
+    $('pvTier').textContent = d.tier;
+    $('pvName').textContent = d.name;
+    $('pvPrice').textContent = precioTexto(d);
+    $('pvFeatures').innerHTML = d.features.map(f=>`<li>${J.esc(f)}</li>`).join('');
+    $('planField').value = d.name;
+    const pw = $('previewWrap');
+    pw.style.display = 'block';
+    $('formWrap').style.display = 'none';
+    $('btnConfirm').style.display = 'inline-flex';
+    actualizarTotal();
+    step(2);
+    setTimeout(() => pw.scrollIntoView({behavior:'smooth',block:'start'}), 80);
+  }
+
+  function changePlan() {
+    $('previewWrap').style.display = 'none';
+    $('formWrap').style.display = 'none';
+    $('btnConfirm').style.display = 'inline-flex';
+    document.querySelectorAll('#plansGrid .card').forEach(c=>c.style.outline='none');
+    selectedKey = null;
+    step(1);
+    $('plansGrid').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function showForm() {
+    const fw = $('formWrap');
+    fw.style.display = 'block';
+    $('btnConfirm').style.display = 'none';
+    step(3);
+    setTimeout(() => fw.scrollIntoView({behavior:'smooth',block:'start'}), 80);
+  }
+
+  function personas() {
+    const n = parseInt($('fPersonas').value, 10);
+    return Number.isInteger(n) ? Math.min(Math.max(n, 1), 30) : 1;
+  }
+  function actualizarTotal() {
+    const d = PLANS[selectedKey];
+    if (!d || d.precio == null) { $('totalVal').textContent = 'Se informará al confirmar'; $('totalUsd').textContent = ''; return; }
+    const total = d.precio * personas();
+    $('totalVal').textContent = J.dinero(total, d.moneda);
+    $('totalUsd').textContent = d.moneda === 'Bs.'
+      ? `≈ $us ${Math.round(total / TIPO_CAMBIO).toLocaleString('es-BO')} (tipo de cambio referencial Bs ${TIPO_CAMBIO.toFixed(2)}). Monto final sujeto a confirmación.`
+      : 'Monto final sujeto a confirmación.';
+  }
+  $('fPersonas').addEventListener('input', actualizarTotal);
+
+  function errorForm(t) {
+    const m = $('formErr'); m.textContent = t || ''; m.classList.toggle('show', !!t);
+    if (t) m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ── Cuenta: precargar datos si hay sesión, o invitar a ingresar ──
+  async function prepararSesion() {
+    const info = $('sesionInfo');
+    if (Auth.logueado()) {
+      try {
+        const c = await Auth.api('/clientes/me');
+        $('fNombre').value = c.nombre; $('fEmail').value = c.email; $('fWhatsapp').value = J.verTel(c.whatsapp);
+        info.innerHTML = `Reservando como <b>${J.esc(c.nombre)}</b> · <a href="mi-cuenta.html" style="color:var(--gold);">Mi cuenta</a>`;
+        info.classList.add('show');
+        return;
+      } catch { /* sesión vencida: seguimos como invitado */ }
+    }
+    info.innerHTML = '¿Ya tienes cuenta? <a href="login.html?next=reservas.html" style="color:var(--gold);">Ingresa</a> para precargar tus datos y ver el estado de tus reservas.';
+    info.classList.add('show');
+    $('okCuenta').href = 'login.html#registro';
+    $('okCuenta').textContent = 'Crear cuenta para seguir mi reserva';
+  }
+
+  async function submitForm() {
+    errorForm('');
+    const nombre = $('fNombre').value.trim();
+    const email  = $('fEmail').value.trim();
+    const tel    = J.normTel($('fWhatsapp').value);
+    const fecha  = $('fFecha').value;
+    const d = PLANS[selectedKey];
+
+    if (!d) return errorForm('Primero elige un plan.');
+    if (nombre.length < 3) return errorForm('Escribe tu nombre completo.');
+    if (!tel) return errorForm('El celular no es válido. Bolivia: 8 dígitos (ej. 71234567). Otro país: con código (+54 9 11…).');
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return errorForm('El correo no es válido.');
+    if (fecha && fecha < J.hoy()) return errorForm('La fecha preferida no puede ser anterior a hoy.');
+
+    const btn = $('btnEnviar'); btn.disabled = true; btn.textContent = 'ENVIANDO…';
+    try {
+      const r = await Auth.api('/reservas', { method: 'POST', body: JSON.stringify({
+        nombre_cliente: nombre, whatsapp: tel, email,
+        plan_slug: selectedKey, num_personas: personas(),
+        fecha_preferida: fecha || null, comentarios: $('fComent').value.trim(),
+      }) });
+
+      $('formWrap').style.display = 'none';
+      $('previewWrap').style.display = 'none';
+      document.querySelectorAll('#plansGrid .card').forEach(c => c.style.outline = 'none');
+      $('okCodigo').textContent = r.codigo;
+      $('okDetalle').textContent = `${r.plan} · ${r.num_personas} persona${r.num_personas > 1 ? 's' : ''} · Total estimado ${J.dinero(r.total, r.moneda)}.`;
+      const cfg = await fetch('/api/config').then(x => x.json()).catch(() => ({}));
+      const wa = J.wa(cfg.whatsapp_contacto,
+        `Hola Jacha Tours, acabo de enviar la solicitud ${r.codigo}: ${r.plan}, ${r.num_personas} persona${r.num_personas > 1 ? 's' : ''}` +
+        (r.fecha_preferida ? `, para el ${J.fecha(r.fecha_preferida)}` : '') + '.');
+      if (wa) { $('okWa').href = wa; $('okWa').style.display = 'inline-flex'; }
+      if (Auth.logueado()) { $('okCuenta').href = 'mi-cuenta.html'; $('okCuenta').textContent = 'Ver mis reservas'; }
+      const sw = $('successWrap'); sw.style.display = 'block';
+      step(3);
+      setTimeout(() => sw.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+    } catch (e) {
+      errorForm(e.message);
+      btn.disabled = false; btn.textContent = 'ENVIAR SOLICITUD DE RESERVA →';
+    }
+  }
+
+  $('fFecha').min = J.hoy();   // no se puede elegir un día pasado (hora de Bolivia)
+  cargarDatos().then(() => {
+    // Si venimos de otra página con ?plan=gold, lo dejamos preseleccionado
+    const q = new URLSearchParams(location.search).get('plan');
+    if (q && PLANS[q]) selectPlan(q, $('card-' + q));
+  });
+  prepararSesion();
+</script>
+<script src="assets/dynamic.js"></script>
+</body>
+</html>

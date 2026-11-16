@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cholet Moreno · JACHA TOURS</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .cholet-hero { position:relative; height:90vh; min-height:560px; display:flex; align-items:flex-end; padding:0 5vw 10vh; overflow:hidden; }
+    .cholet-hero-bg { position:absolute; inset:0; }
+    .cholet-hero-bg img { width:100%; height:100%; object-fit:cover; filter:brightness(.48) contrast(1.08); transition:transform 8s ease; }
+    .cholet-hero-bg img:hover { transform:scale(1.03); }
+    .cholet-hero-overlay { position:absolute; inset:0; pointer-events:none; background: linear-gradient(to top,rgba(8,6,7,.97) 0%,rgba(8,6,7,.5) 40%,rgba(8,6,7,.18) 75%,transparent 95%), linear-gradient(to right,rgba(8,6,7,.65) 0%,transparent 58%); }
+    .cholet-hero-grain { position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.28; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"); background-size:180px; }
+    .cholet-hero-content { position:relative;z-index:3; animation:fadeUp .9s var(--ease) both; }
+
+    .about-split { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start; }
+    .about-media { position:relative; }
+    .about-media img { height:500px; width:100%; object-fit:cover; }
+    .about-media::after { content:''; position:absolute; bottom:-18px; right:-18px; width:56%; height:56%; border:1.5px solid var(--gold-line); pointer-events:none; }
+
+    .mem-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; }
+
+    .zones-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:3px; margin-top:56px; }
+    .zone-card { position:relative; height:320px; overflow:hidden; cursor:pointer; background:var(--surface); }
+    .zone-card img { width:100%; height:100%; object-fit:cover; filter:brightness(.72) saturate(.9); transition:transform .8s var(--ease),filter .4s; }
+    .zone-card:hover img { transform:scale(1.07); filter:brightness(.9) saturate(1.1); }
+    .zone-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(8,6,7,.92) 0%,transparent 60%); padding:24px; display:flex; flex-direction:column; justify-content:flex-end; }
+    .zone-tag { font-size:.57rem; color:var(--gold); letter-spacing:.24em; text-transform:uppercase; font-weight:600; margin-bottom:7px; }
+    .zone-name { font-family:'Cormorant',serif; font-size:1.8rem; font-weight:400; line-height:1.2; margin-bottom:6px; }
+    .zone-desc { font-size:.78rem; color:var(--text-dim); }
+    .zone-arrow { position:absolute; top:20px; right:20px; width:36px; height:36px; border:1px solid rgba(201,168,76,.3); display:flex; align-items:center; justify-content:center; color:var(--gold); transform:scale(0) rotate(-45deg); opacity:0; transition:var(--tr); }
+    .zone-card:hover .zone-arrow { transform:scale(1) rotate(0); opacity:1; }
+
+    @media(max-width:960px){
+      .about-split { grid-template-columns:1fr; gap:48px; }
+      .mem-grid { grid-template-columns:1fr; }
+      .zones-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cg"></div>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">JACHA<span class="nav-logo-sep"> · </span>TOURS</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="circuito.html">Circuito</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="experiencia.html" class="active">Experiencias</a>
+      <a href="reservas.html">Reservas</a>
+    </div>
+    <a href="reservas.html" class="btn btn-gold" style="padding:10px 24px;font-size:.62rem;">Reservar</a>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">Inicio</a>
+  <a href="circuito.html">Circuito</a>
+  <a href="mapa.html">Mapa</a>
+  <a href="experiencia.html">Experiencias</a>
+  <a href="reservas.html">Reservas</a>
+  <a href="reservas.html" class="btn btn-gold" style="width:fit-content;margin-top:8px;">Reservar Ahora</a>
+</div>
+
+<!-- ══ HERO ══ -->
+<section class="cholet-hero">
+  <div class="cholet-hero-bg"><img src="assets/img/cholets/moreno.jpg" alt="Cholet Moreno" id="heroBgImg"></div>
+  <div class="cholet-hero-overlay"></div>
+  <div class="cholet-hero-grain"></div>
+  <div class="hero-line-bottom"></div>
+  <div class="cholet-hero-content">
+    <p class="eyebrow label-line" style="margin-bottom:20px;">El Alto, Bolivia</p>
+    <h1 style="font-family:'Cormorant',serif;font-size:clamp(3rem,7vw,5.5rem);font-weight:300;line-height:1.08;margin-bottom:20px;">
+      Cholet <em style="font-style:italic;color:var(--gold-bright);">Moreno</em><br>— Elegancia Privada
+    </h1>
+    <p style="color:var(--text-dim);font-size:.95rem;max-width:460px;margin-bottom:36px;">Ambientes luminosos, detalles geométricos y un recorrido sofisticado para eventos privados de alto nivel.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      <a href="reservas.html" class="btn btn-gold">Reservar Experiencia Moreno →</a>
+      <a href="experiencia.html" class="btn btn-ghost">Todas las Experiencias</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ABOUT ══ -->
+<section class="section section-dark">
+  <div class="about-split">
+    <div class="about-media reveal">
+      <img src="assets/img/interiores/salon-gala.jpg" alt="Interior Moreno">
+    </div>
+    <div class="reveal reveal-delay-1">
+      <p class="eyebrow label-line">El Espacio</p>
+      <h2 class="section-title" style="margin-top:14px;">Elegancia Andina <em>en cada espacio</em></h2>
+      <div class="gold-line"></div>
+      <p style="color:var(--text-dim);font-size:.9rem;line-height:1.92;margin-bottom:16px;">El Cholet Moreno combina arquitectura neoandina y diseño contemporáneo. Sus espacios están pensados para eventos de alto impacto: iluminación dinámica, detalles dorados y una atmósfera festiva que celebra la cultura alteña.</p>
+      <p style="color:var(--text-dim);font-size:.9rem;line-height:1.92;margin-bottom:28px;">Cuenta con cocina equipada de alto nivel, salón principal de 300 personas, escenario versátil y un garzonier exclusivo para invitados especiales.</p>
+      <a href="reservas.html" class="btn btn-gold">Reservar Ahora →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ MEMBRESÍAS ══ -->
+<section class="section">
+  <div class="section-head center reveal">
+    <p class="eyebrow label-line" style="justify-content:center;">Acceso</p>
+    <h2 class="section-title">Niveles de <em>Acceso</em></h2>
+  </div>
+  <div class="mem-grid">
+    <div class="card plan-card reveal">
+      <div class="plan-tier">Básico</div>
+      <div class="plan-name">Blue Silver</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Espacios exteriores y fachada</li>
+        <li>Guía local bilingüe</li>
+        <li>Fotografía exterior</li>
+        <li>Audioguía descargable</li>
+      </ul>
+      <a href="reservas.html" class="btn btn-ghost" style="width:100%;justify-content:center;">Elegir Silver</a>
+      <div class="plan-bg-num">01</div>
+    </div>
+    <div class="card plan-card featured reveal reveal-delay-1">
+      <div class="plan-badge">Recomendado</div>
+      <div class="plan-tier">Experiencia</div>
+      <div class="plan-name">Aurum Gold</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Salón principal + catering gourmet</li>
+        <li>Show en vivo incluido</li>
+        <li>Brindis artesanal andino</li>
+        <li>Transporte privado</li>
+        <li>Acceso al escenario</li>
+      </ul>
+      <a href="reservas.html" class="btn btn-gold" style="width:100%;justify-content:center;">Elegir Gold →</a>
+      <div class="plan-bg-num">02</div>
+    </div>
+    <div class="card plan-card reveal reveal-delay-2">
+      <div class="plan-tier">Distinción</div>
+      <div class="plan-name">Platinum VIP</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Experiencia completa + show en vivo</li>
+        <li>Acceso a Garzonier Privado</li>
+        <li>Cena privada exclusiva</li>
+        <li>Sesión fotográfica profesional</li>
+        <li>Transporte y seguridad VIP</li>
+      </ul>
+      <a href="reservas.html" class="btn btn-ghost" style="width:100%;justify-content:center;">Elegir Platinum</a>
+      <div class="plan-bg-num">03</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ZONAS ══ -->
+<section class="section section-dark">
+  <div class="section-head reveal">
+    <p class="eyebrow label-line">Espacios Destacados</p>
+    <h2 class="section-title">Espacios del <em>Moreno</em></h2>
+  </div>
+  <div class="zones-grid reveal">
+    <div class="zone-card">
+      <img src="assets/img/interiores/salon-gala.jpg" alt="Salón de Gala">
+      <div class="zone-overlay">
+        <div class="zone-tag">Zona Central</div>
+        <div class="zone-name">Salón de Gala</div>
+        <p class="zone-desc">500 personas · iluminación dinámica y detalles dorados.</p>
+      </div>
+      <div class="zone-arrow">→</div>
+    </div>
+    <div class="zone-card">
+      <img src="assets/img/interiores/cocina.jpg" alt="Cocina Industrial">
+      <div class="zone-overlay">
+        <div class="zone-tag">Gastronomía</div>
+        <div class="zone-name">Cocina Industrial</div>
+        <p class="zone-desc">Equipamiento profesional para banquetes masivos.</p>
+      </div>
+      <div class="zone-arrow">→</div>
+    </div>
+    <div class="zone-card">
+      <img src="assets/img/interiores/escenario.jpg" alt="Escenario">
+      <div class="zone-overlay">
+        <div class="zone-tag">Espectáculo</div>
+        <div class="zone-name">Escenario Principal</div>
+        <p class="zone-desc">Shows, música en vivo y presentaciones culturales.</p>
+      </div>
+      <div class="zone-arrow">→</div>
+    </div>
+    <div class="zone-card">
+      <img src="assets/img/interiores/garzonier.jpg" alt="Garzonier">
+      <div class="zone-overlay">
+        <div class="zone-tag">VIP</div>
+        <div class="zone-name">Garzonier Privado</div>
+        <p class="zone-desc">Ambiente exclusivo con vistas panorámicas al salón.</p>
+      </div>
+      <div class="zone-arrow">→</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<section class="section section-ink" style="text-align:center;">
+  <div style="max-width:600px;margin:0 auto;" class="reveal">
+    <p class="eyebrow" style="justify-content:center;display:flex;gap:14px;">
+      <span style="width:28px;height:1px;background:var(--gold);display:inline-block;align-self:center;"></span>
+      Siguiente Paso
+      <span style="width:28px;height:1px;background:var(--gold);display:inline-block;align-self:center;"></span>
+    </p>
+    <h2 class="section-title" style="margin-top:14px;">Reserve su visita al <em>Moreno</em></h2>
+    <div class="gold-line center"></div>
+    <p style="color:var(--text-dim);font-size:.9rem;line-height:1.9;margin:20px 0 36px;">Seleccione el nivel de acceso que mejor se adapte a su experiencia ideal y únase a los viajeros que han vivido la elegancia del Moreno.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <a href="reservas.html" class="btn btn-gold">Reservar Ahora →</a>
+      <a href="experiencia.html" class="btn btn-ghost">Otras Experiencias</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BOOKING BAND ══ -->
+<div class="booking-band reveal">
+  <div>
+    <div class="booking-date-label"><span class="pulse-dot"></span> Próxima Salida Confirmada</div>
+    <div class="booking-date" data-config="fecha">15 Junio, 2026</div>
+    <div class="booking-slots" data-config="cupos">Solo quedan 4 cupos disponibles · El Alto</div>
+  </div>
+  <a href="reservas.html" class="btn btn-gold" style="padding:20px 52px;font-size:.75rem;">Asegurar mi Lugar →</a>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">JACHA TOURS</div><p class="footer-tagline">Experiencias de lujo en la capital mundial de la arquitectura Neoandina.</p></div>
+    <div class="footer-col"><h5>Navegación</h5><a href="index.html">Inicio</a><a href="circuito.html">Circuito</a><a href="mapa.html">Mapa</a><a href="experiencia.html">Experiencias</a><a href="reservas.html">Reservas</a></div>
+    <div class="footer-col"><h5>Paquetes</h5><a href="reservas.html">Blue Silver</a><a href="reservas.html">Aurum Gold</a><a href="reservas.html">Platinum VIP</a></div>
+    <div class="footer-col"><h5>Contacto</h5><p>El Alto, Bolivia</p><p data-config="whatsapp">+591 7X XXX XXXX</p><p data-config="email">hola@jachatours.bo</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Jacha Tours Bolivia · Todos los derechos reservados</p>
+    <p>Arquitectura Neoandina · El Alto · Bolivia</p>
+  </div>
+</footer>
+
+<script>
+  const cg=document.getElementById('cg');
+  window.addEventListener('mousemove',e=>{cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';});
+  const nav=document.getElementById('nav');
+  window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60),{passive:true});
+  const toggle=document.getElementById('navToggle'),drawer=document.getElementById('navDrawer');
+  toggle.addEventListener('click',()=>{toggle.classList.toggle('open');drawer.classList.toggle('open');});
+  const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');ro.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+</script>
+<script src="assets/common.js"></script>
+<script src="assets/dynamic.js"></script>
+</body>
+</html>

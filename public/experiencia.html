@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Experiencias · JACHA TOURS</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .levels-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; }
+
+    .explorer { display:grid; grid-template-columns:260px 1fr; gap:3px; margin-top:56px; }
+    .exp-menu { display:flex; flex-direction:column; gap:3px; }
+    .exp-tab { background:var(--surface); border:1px solid var(--gold-line); color:var(--text-dim); padding:22px 20px; text-align:left; font-family:'Outfit',sans-serif; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; transition:var(--tr); border-left:3px solid transparent; }
+    .exp-tab:hover { background:var(--panel); color:var(--text); }
+    .exp-tab.active { background:var(--panel); border-left-color:var(--gold); color:var(--gold); padding-left:24px; }
+
+    .exp-viewer { display:flex; flex-direction:column; gap:0; }
+    .exp-stage { position:relative; aspect-ratio:16/9; background:var(--surface); overflow:hidden; border:1px solid var(--gold-line); }
+    .exp-stage img { width:100%; height:100%; object-fit:cover; transition:opacity .45s var(--ease), transform .8s var(--ease); }
+    .exp-stage img.fade { opacity:0; transform:scale(1.04); }
+    .exp-btn-nav { position:absolute; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%; background:rgba(8,6,7,.7); border:1px solid var(--gold-line); color:var(--gold); font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--tr); z-index:5; }
+    .exp-btn-nav:hover { background:var(--gold); color:var(--black); }
+    .exp-btn-nav.prev { left:16px; } .exp-btn-nav.next { right:16px; }
+    .exp-counter { position:absolute; bottom:16px; right:16px; background:rgba(8,6,7,.8); backdrop-filter:blur(8px); border:1px solid var(--gold-line); font-size:.65rem; color:var(--gold); padding:6px 14px; letter-spacing:.12em; }
+
+    .exp-panel { background:var(--surface); border:1px solid var(--gold-line); border-top:3px solid var(--gold); padding:44px; margin-top:-1px; }
+    .exp-panel h3 { font-family:'Cormorant',serif; font-size:2.4rem; color:var(--gold); font-weight:400; margin-bottom:14px; }
+    .exp-panel-desc { color:var(--text-dim); font-size:.9rem; line-height:1.9; margin-bottom:32px; border-left:2px solid rgba(201,168,76,.3); padding-left:20px; }
+    .exp-specs { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+    .exp-spec h5 { font-size:.58rem; color:var(--gold); letter-spacing:.22em; text-transform:uppercase; font-weight:700; margin-bottom:7px; }
+    .exp-spec p { font-size:.85rem; color:var(--text-dim); }
+
+    .gallery-strip { overflow:hidden; border-top:1px solid var(--gold-line); border-bottom:1px solid var(--gold-line); }
+    .gallery-track { display:flex; gap:3px; width:max-content; animation:galleryScroll 38s linear infinite; }
+    .gallery-track:hover { animation-play-state:paused; }
+    @keyframes galleryScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .gallery-slide { width:320px; height:220px; flex-shrink:0; overflow:hidden; }
+    .gallery-slide img { width:100%; height:100%; object-fit:cover; filter:brightness(.75) saturate(.88); transition:var(--tr); }
+    .gallery-slide:hover img { filter:brightness(.95) saturate(1.1); transform:scale(1.06); }
+
+    .exp-intro { display:grid; grid-template-columns:1fr 1fr; gap:72px; align-items:center; }
+    .exp-intro-media { position:relative; }
+    .exp-intro-media img { height:500px; width:100%; object-fit:cover; }
+    .exp-intro-media::after { content:''; position:absolute; bottom:-16px; right:-16px; width:55%; height:55%; border:1.5px solid var(--gold-line); pointer-events:none; }
+
+    @media(max-width:1100px){
+      .levels-grid { grid-template-columns:1fr; }
+      .explorer { grid-template-columns:1fr; }
+      .exp-menu { flex-direction:row; overflow-x:auto; }
+      .exp-specs { grid-template-columns:1fr; }
+      .exp-intro { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cg"></div>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">JACHA<span class="nav-logo-sep"> · </span>TOURS</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="circuito.html">Circuito</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="experiencia.html" class="active">Experiencias</a>
+      <a href="reservas.html">Reservas</a>
+    </div>
+    <a href="reservas.html" class="btn btn-gold" style="padding:10px 24px;font-size:.62rem;">Reservar</a>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">Inicio</a>
+  <a href="circuito.html">Circuito</a>
+  <a href="mapa.html">Mapa</a>
+  <a href="experiencia.html">Experiencias</a>
+  <a href="reservas.html">Reservas</a>
+  <a href="reservas.html" class="btn btn-gold" style="width:fit-content;margin-top:8px;">Reservar Ahora</a>
+</div>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-vid-wrap">
+    <video id="heroVid" autoplay muted loop playsinline poster="assets/img/interiores/salon-gala.jpg">
+      <source src="assets/videos/experiencia.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-line-bottom"></div>
+  <div class="hero-content">
+    <p class="eyebrow label-line" style="margin-bottom:22px;">Inmersión Cultural</p>
+    <h1 class="hero-title">
+      <span class="line-wrap"><span class="line-inner"><em>Inmersión</em></span></span>
+      <span class="line-wrap"><span class="line-inner">Jacha —</span></span>
+      <span class="line-wrap"><span class="line-inner">Tres Niveles</span></span>
+    </h1>
+    <p class="hero-sub">Desde una primera visita panorámica hasta una experiencia VIP privada. Cada nivel le acerca más al alma de los cholets.</p>
+    <div class="hero-actions">
+      <a href="#niveles" class="btn btn-gold">Ver Niveles →</a>
+      <a href="reservas.html" class="btn btn-ghost">Reservar Ahora</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ INTRO ══ -->
+<section class="section section-dark">
+  <div class="exp-intro">
+    <div class="exp-intro-media reveal">
+      <img src="assets/img/interiores/salon-gala.jpg" alt="Salón de Gala">
+    </div>
+    <div class="reveal reveal-delay-1">
+      <p class="eyebrow label-line">La Propuesta</p>
+      <h2 class="section-title" style="margin-top:14px;">Más allá de una visita,<br>una <em>revelación</em></h2>
+      <div class="gold-line"></div>
+      <p style="color:var(--text-dim);font-size:.9rem;line-height:1.9;margin-bottom:16px;">Los cholets no son solo arquitectura. Son el resultado de décadas de historia migratoria, de orgullo cultural y de una creatividad que no pide permiso a nadie.</p>
+      <p style="color:var(--text-dim);font-size:.9rem;line-height:1.9;margin-bottom:32px;">Nuestros guías son historiadores, arquitectos y apasionados por el altiplano. Cada visita es única, narrativa y profunda.</p>
+      <a href="reservas.html" class="btn btn-gold">Elegir mi Experiencia →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NIVELES ══ -->
+<section class="section" id="niveles">
+  <div class="section-head center reveal">
+    <p class="eyebrow label-line" style="justify-content:center;">Categorías de Tour</p>
+    <h2 class="section-title">Niveles de <em>Inmersión</em></h2>
+    <div class="gold-line center"></div>
+  </div>
+  <div class="levels-grid">
+    <div class="card plan-card reveal">
+      <div class="plan-tier">Iniciación</div>
+      <div class="plan-name">Blue Silver</div>
+      <div class="plan-price" data-plan="silver"   data-field="precio">$250 <small>/ persona</small></div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Acceso a perímetros y fachadas principales</li>
+        <li>Guía histórica de arquitectura Neoandina</li>
+        <li>Sesión fotográfica en puntos estratégicos</li>
+        <li>Audioguía técnica descargable</li>
+        <li>Transporte panorámico con Wi-Fi</li>
+      </ul>
+      <a href="reservas.html" class="btn btn-ghost" style="width:100%;justify-content:center;">Elegir Blue Silver</a>
+      <div class="plan-bg-num">01</div>
+    </div>
+    <div class="card plan-card featured reveal reveal-delay-1">
+      <div class="plan-badge">Más Popular</div>
+      <div class="plan-tier">Experiencia</div>
+      <div class="plan-name">Aurum Gold</div>
+      <div class="plan-price" data-plan="gold"     data-field="precio">$550 <small>/ persona</small></div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Ingreso a Salones Principales</li>
+        <li>Tour por Cocinas Industriales</li>
+        <li>Acceso a Escenarios de Gala</li>
+        <li>Degustación de aperitivos locales</li>
+        <li>Experiencia de Realidad Aumentada</li>
+        <li>Transporte Privado de Lujo</li>
+      </ul>
+      <a href="reservas.html" class="btn btn-gold" style="width:100%;justify-content:center;">Reservar Aurum Gold →</a>
+      <div class="plan-bg-num">02</div>
+    </div>
+    <div class="card plan-card reveal reveal-delay-2">
+      <div class="plan-tier">Distinción</div>
+      <div class="plan-name">Platinum VIP</div>
+      <div class="plan-price" data-plan="platinum" data-field="precio">$1,200 <small>/ persona</small></div>
+      <div class="plan-divider"></div>
+      <ul class="plan-list">
+        <li>Acceso a Penthouses (Garzonier)</li>
+        <li>Encuentro con arquitectos y dueños</li>
+        <li>Cena Privada en el Cholet</li>
+        <li>Transporte Privado VIP</li>
+        <li>Sesión fotográfica profesional</li>
+        <li>Atención personalizada 24/7</li>
+      </ul>
+      <a href="reservas.html" class="btn btn-ghost" style="width:100%;justify-content:center;">Elegir Platinum VIP</a>
+      <div class="plan-bg-num">03</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EXPLORADOR INTERACTIVO ══ -->
+<section class="section section-dark">
+  <div class="section-head reveal">
+    <p class="eyebrow label-line">Explorador Visual</p>
+    <h2 class="section-title">Conoce los <em>Espacios</em></h2>
+    <p class="section-sub">Navega por los distintos ambientes que forman parte del circuito.</p>
+  </div>
+  <div class="explorer reveal">
+    <div class="exp-menu" id="expMenu">
+      <button class="exp-tab active" data-exp="titanic" onclick="switchExp('titanic',this)">Cholet Titanic</button>
+      <button class="exp-tab" data-exp="ingenio" onclick="switchExp('ingenio',this)">El Ingenio</button>
+      <button class="exp-tab" data-exp="crucero" onclick="switchExp('crucero',this)">Cholet Crucero</button>
+      <button class="exp-tab" data-exp="interior" onclick="switchExp('interior',this)">Salones</button>
+      <button class="exp-tab" data-exp="cocina" onclick="switchExp('cocina',this)">Cocinas</button>
+      <button class="exp-tab" data-exp="penthouse" onclick="switchExp('penthouse',this)">Penthouses</button>
+    </div>
+    <div class="exp-viewer">
+      <div class="exp-stage">
+        <img id="expImg" src="assets/img/cholets/titanic.jpg" alt="Vista del cholet">
+        <button class="exp-btn-nav prev" onclick="navImg(-1)">‹</button>
+        <button class="exp-btn-nav next" onclick="navImg(1)">›</button>
+        <div class="exp-counter"><span id="expCur">1</span> / <span id="expTot">2</span></div>
+      </div>
+      <div class="exp-panel">
+        <h3 id="expTitle">Cholet Titanic</h3>
+        <p class="exp-panel-desc" id="expDesc">El ícono absoluto del movimiento neoandino. Sus salones de gala con iluminación dinámica y detalles dorados son el corazón de la experiencia Jacha.</p>
+        <div class="exp-specs">
+          <div class="exp-spec"><h5>Capacidad</h5><p id="expCap">Hasta 500 personas</p></div>
+          <div class="exp-spec"><h5>Estilo</h5><p id="expStyle">Neoandino Festivo</p></div>
+          <div class="exp-spec"><h5>Destacado</h5><p id="expHigh">Salones con iluminación LED dinámica</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GALERÍA STRIP ══ -->
+<div class="gallery-strip">
+  <div class="gallery-track">
+    <div class="gallery-slide"><img src="assets/img/cholets/crucero.jpg" alt="Crucero"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/transformer.jpg" alt="Transformer"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/titanic.jpg" alt="Titanic"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/moreno.jpg" alt="Moreno"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/ingenio.jpg" alt="Ingenio"></div>
+    <div class="gallery-slide"><img src="assets/img/interiores/salon-gala.jpg" alt="Salon"></div>
+    <div class="gallery-slide"><img src="assets/img/interiores/escenario.jpg" alt="Escenario"></div>
+    <div class="gallery-slide"><img src="assets/img/interiores/garzonier.jpg" alt="Garzonier"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/crucero.jpg" alt="Crucero"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/transformer.jpg" alt="Transformer"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/titanic.jpg" alt="Titanic"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/moreno.jpg" alt="Moreno"></div>
+    <div class="gallery-slide"><img src="assets/img/cholets/ingenio.jpg" alt="Ingenio"></div>
+    <div class="gallery-slide"><img src="assets/img/interiores/salon-gala.jpg" alt="Salon"></div>
+    <div class="gallery-slide"><img src="assets/img/interiores/escenario.jpg" alt="Escenario"></div>
+    <div class="gallery-slide"><img src="assets/img/interiores/garzonier.jpg" alt="Garzonier"></div>
+  </div>
+</div>
+
+<!-- ══ CTA ══ -->
+<section class="section section-ink" style="text-align:center;">
+  <div style="max-width:640px;margin:0 auto;" class="reveal">
+    <p class="eyebrow" style="justify-content:center;display:flex;gap:14px;">
+      <span style="width:28px;height:1px;background:var(--gold);display:inline-block;align-self:center;"></span>
+      Próximo Paso
+      <span style="width:28px;height:1px;background:var(--gold);display:inline-block;align-self:center;"></span>
+    </p>
+    <h2 class="section-title" style="margin-top:14px;">¿Listo para vivir la <em>experiencia</em>?</h2>
+    <div class="gold-line center"></div>
+    <p style="color:var(--text-dim);font-size:.9rem;line-height:1.9;margin:20px 0 36px;">Reserve su lugar y únase a los cientos de viajeros que han descubierto la magia de la arquitectura Neoandina de El Alto.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <a href="reservas.html" class="btn btn-gold">Reservar Ahora →</a>
+      <a href="circuito.html" class="btn btn-ghost">Ver Circuito</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BOOKING BAND ══ -->
+<div class="booking-band reveal">
+  <div>
+    <div class="booking-date-label"><span class="pulse-dot"></span> Próxima Salida Confirmada</div>
+    <div class="booking-date" data-config="fecha">15 Junio, 2026</div>
+<div class="booking-slots" data-config="cupos">Solo quedan 4 cupos disponibles · El Alto</div>
+  </div>
+  <a href="reservas.html" class="btn btn-gold" style="padding:20px 52px;font-size:.75rem;">Asegurar mi Lugar →</a>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">JACHA TOURS</div><p class="footer-tagline">Experiencias de lujo en la capital mundial de la arquitectura Neoandina.</p></div>
+    <div class="footer-col"><h5>Navegación</h5><a href="index.html">Inicio</a><a href="circuito.html">Circuito</a><a href="mapa.html">Mapa</a><a href="experiencia.html">Experiencias</a><a href="reservas.html">Reservas</a></div>
+    <div class="footer-col"><h5>Paquetes</h5><a href="reservas.html">Blue Silver</a><a href="reservas.html">Aurum Gold</a><a href="reservas.html">Platinum VIP</a></div>
+    <div class="footer-col"><h5>Contacto</h5><p>El Alto, Bolivia</p><p data-config="whatsapp">+591 7X XXX XXXX</p><p data-config="email">hola@jachatours.bo</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Jacha Tours Bolivia · Todos los derechos reservados</p>
+    <p>Arquitectura Neoandina · El Alto · Bolivia</p>
+  </div>
+</footer>
+
+<script>
+  const cg=document.getElementById('cg');
+  window.addEventListener('mousemove',e=>{cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';});
+  const nav=document.getElementById('nav');
+  window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60),{passive:true});
+  const toggle=document.getElementById('navToggle'),drawer=document.getElementById('navDrawer');
+  toggle.addEventListener('click',()=>{toggle.classList.toggle('open');drawer.classList.toggle('open');});
+  document.getElementById('heroVid').addEventListener('canplay',function(){this.classList.add('loaded');});
+
+  const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');ro.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+  const EXP = {
+    titanic:  { title:'Cholet Titanic',  imgs:['assets/img/cholets/titanic.jpg','assets/img/interiores/salon-gala.jpg'], cap:'Hasta 500 personas', style:'Neoandino Festivo',   high:'Salones con iluminación LED dinámica',    desc:'El ícono absoluto del movimiento neoandino. Salones de gala con iluminación dinámica y detalles dorados son el corazón de la experiencia Jacha.' },
+    ingenio:  { title:'El Ingenio',      imgs:['assets/img/cholets/ingenio.jpg','assets/img/interiores/cocina.jpg'],    cap:'Hasta 300 personas', style:'Neoandino Industrial', high:'Fachadas de colores vibrantes únicos',       desc:'Monumento a la creatividad alteña. Sus fachadas exhiben murales de la cosmovisión andina y los interiores son una explosión de dorados y cristal.' },
+    crucero:  { title:'Cholet Crucero',  imgs:['assets/img/cholets/crucero.jpg','assets/img/cholets/transformer.jpg'],  cap:'Hasta 400 personas', style:'Náutico-Andino',       high:'Fachada en forma de crucero trasatlántico',  desc:'El cholet más fotografiado de El Alto. Su diseño náutico fusiona un crucero trasatlántico con símbolos de la cosmovisión aymara.' },
+    interior: { title:'Salones de Gala', imgs:['assets/img/interiores/salon-gala.jpg','assets/img/cholets/salon-condor.jpg'], cap:'Hasta 600 personas', style:'Gala Neoandina', high:'Pan de oro y cristal en cada detalle',       desc:'Los interiores de los cholets son tan espectaculares como sus exteriores. Dorados, espejos, cristales y geometría andina en estado puro.' },
+    cocina:   { title:'Cocinas Industriales', imgs:['assets/img/interiores/cocina.jpg','assets/img/tour/almuerzo.jpg'], cap:'Gastronomía masiva', style:'Industrial Premium',    high:'Equipamiento de alta gama profesional',      desc:'Cocinas de grado industrial diseñadas para preparar simultáneamente miles de platos con eficiencia perfecta en banquetes masivos.' },
+    penthouse:{ title:'Penthouses VIP',  imgs:['assets/img/interiores/penthouse.jpg','assets/img/interiores/garzonier.jpg'], cap:'Exclusivo privado', style:'Lujo Residencial', high:'Vistas panorámicas 360° de El Alto',        desc:'La "casa del dueño". Ubicados en la cima del cholet, estos espacios de triple altura ofrecen privacidad absoluta y vistas espectaculares.' },
+  };
+  let curExp='titanic', curImg=0;
+
+  function switchExp(key, btn) {
+    curExp=key; curImg=0; updateExp();
+    document.querySelectorAll('.exp-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function navImg(dir) {
+    const imgs=EXP[curExp].imgs;
+    curImg=(curImg+dir+imgs.length)%imgs.length;
+    updateExp();
+  }
+  function updateExp() {
+    const d=EXP[curExp];
+    const img=document.getElementById('expImg');
+    img.classList.add('fade');
+    setTimeout(()=>{ img.src=d.imgs[curImg]; img.classList.remove('fade'); },250);
+    document.getElementById('expTitle').textContent=d.title;
+    document.getElementById('expDesc').textContent=d.desc;
+    document.getElementById('expCap').textContent=d.cap;
+    document.getElementById('expStyle').textContent=d.style;
+    document.getElementById('expHigh').textContent=d.high;
+    document.getElementById('expCur').textContent=curImg+1;
+    document.getElementById('expTot').textContent=d.imgs.length;
+  }
+</script>
+
+<script src="assets/common.js"></script>
+<script src="assets/dynamic.js"></script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi cuenta · JACHA TOURS</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="cursor-glow" id="cg"></div>
+<nav class="nav scrolled" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">JACHA<span class="nav-logo-sep"> · </span>TOURS</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="circuito.html">Circuito</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="experiencia.html">Experiencias</a>
+      <a href="reservas.html">Reservas</a>
+    </div>
+    <a href="#planes" class="btn btn-gold" style="padding:10px 24px;font-size:.62rem;">Reservar Ahora</a>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">Inicio</a>
+  <a href="circuito.html">Circuito</a>
+  <a href="mapa.html">Mapa</a>
+  <a href="experiencia.html">Experiencias</a>
+  <a href="reservas.html">Reservas</a>
+  <a href="#planes" class="btn btn-gold" style="width:fit-content;margin-top:8px;">Reservar Ahora</a>
+</div>
+
+
+<main class="acct">
+  <p class="eyebrow label-line" style="margin-bottom:10px;">Mi cuenta</p>
+  <h1 class="section-title" style="font-size:clamp(2.2rem,5vw,3.4rem);margin-bottom:34px;">Hola, <em id="saludo">…</em></h1>
+
+  <div class="acct-grid">
+    <!-- Perfil -->
+    <div>
+      <section class="panel">
+        <h3>Mis datos</h3>
+        <div class="f-msg" id="msgPerfil"></div>
+        <form id="formPerfil" novalidate>
+          <div class="f-group"><label class="f-label" for="pNombre">Nombre completo</label>
+            <input class="f-input" id="pNombre" maxlength="120" required></div>
+          <div class="f-group"><label class="f-label">Correo</label>
+            <input class="f-input" id="pEmail" disabled style="opacity:.6"></div>
+          <div class="f-group"><label class="f-label" for="pTel">Celular / WhatsApp</label>
+            <input class="f-input" id="pTel" type="tel" required></div>
+          <div class="f-group"><label class="f-label" for="pPais">País</label>
+            <input class="f-input" id="pPais" maxlength="60"></div>
+          <div class="f-group"><label class="f-label" for="pCiudad">Ciudad</label>
+            <input class="f-input" id="pCiudad" maxlength="80"></div>
+          <button class="btn btn-gold btn-block" id="btnPerfil" type="submit">Guardar cambios</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h3>Cambiar contraseña</h3>
+        <div class="f-msg" id="msgPass"></div>
+        <form id="formPass" novalidate>
+          <div class="f-group"><label class="f-label" for="cActual">Contraseña actual</label>
+            <input class="f-input" id="cActual" type="password" autocomplete="current-password" required></div>
+          <div class="f-group"><label class="f-label" for="cNueva">Nueva contraseña</label>
+            <input class="f-input" id="cNueva" type="password" autocomplete="new-password" placeholder="Mínimo 8, con letras y números" required></div>
+          <button class="btn btn-ghost btn-block" id="btnPass" type="submit">Actualizar contraseña</button>
+        </form>
+      </section>
+
+      <button class="btn btn-ghost btn-block" id="btnSalir" type="button">Cerrar sesión</button>
+    </div>
+
+    <!-- Reservas -->
+    <section class="panel" style="margin-bottom:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
+        <h3 style="margin:0;">Mis reservas</h3>
+        <a href="reservas.html" class="btn btn-gold" style="padding:12px 22px;font-size:.62rem;">+ Nueva reserva</a>
+      </div>
+      <p class="f-hint" style="margin-bottom:20px;">Las solicitudes quedan <b>pendientes</b> hasta que te contactemos para confirmarlas.</p>
+      <div class="f-msg" id="msgRes"></div>
+      <div id="listaRes"><p style="color:var(--text-dim);">Cargando…</p></div>
+    </section>
+  </div>
+</main>
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">JACHA TOURS</div><p class="footer-tagline">Experiencias de lujo en la capital mundial de la arquitectura Neoandina.</p></div>
+    <div class="footer-col"><h5>Navegación</h5><a href="index.html">Inicio</a><a href="circuito.html">Circuito</a><a href="mapa.html">Mapa</a><a href="experiencia.html">Experiencias</a><a href="reservas.html">Reservas</a></div>
+    <div class="footer-col"><h5>Paquetes</h5><a href="reservas.html">Blue Silver</a><a href="reservas.html">Aurum Gold</a><a href="reservas.html">Platinum VIP</a></div>
+    <div class="footer-col"><h5>Contacto</h5><p>El Alto, Bolivia</p><p data-config="whatsapp">+591 7X XXX XXXX</p><p data-config="email">hola@jachatours.bo</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Jacha Tours Bolivia · Todos los derechos reservados</p>
+    <p>Arquitectura Neoandina · El Alto · Bolivia</p>
+  </div>
+</footer>
+<script>
+  const cg=document.getElementById('cg');
+  window.addEventListener('mousemove',e=>{cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';});
+  const toggle=document.getElementById('navToggle'),drawer=document.getElementById('navDrawer');
+  toggle.addEventListener('click',()=>{toggle.classList.toggle('open');drawer.classList.toggle('open');});
+</script>
+<script src="assets/common.js"></script>
+<script src="assets/dynamic.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const J = window.Jacha, Auth = window.JachaAuth;
+  if (!Auth.logueado()) location.replace('login.html?next=mi-cuenta.html');
+
+  function aviso(id, texto, ok) {
+    const m = $(id); m.textContent = texto || '';
+    m.className = 'f-msg ' + (ok ? 'ok' : 'err') + (texto ? ' show' : '');
+  }
+  function sesionVencida(e) {
+    if (e.status === 401) { Auth.salir(); location.replace('login.html?next=mi-cuenta.html'); return true; }
+    return false;
+  }
+
+  async function cargarPerfil() {
+    try {
+      const c = await Auth.api('/clientes/me');
+      $('saludo').textContent = c.nombre.split(' ')[0];
+      $('pNombre').value = c.nombre; $('pEmail').value = c.email;
+      $('pTel').value = J.verTel(c.whatsapp); $('pPais').value = c.pais || ''; $('pCiudad').value = c.ciudad || '';
+      return c;
+    } catch (e) { if (!sesionVencida(e)) aviso('msgPerfil', e.message); }
+  }
+
+  let perfil = null;
+
+  async function cargarReservas() {
+    const box = $('listaRes');
+    try {
+      const lista = await Auth.api('/clientes/me/reservas');
+      if (!lista.length) {
+        box.innerHTML = '<p style="color:var(--text-dim);padding:20px 0;">Aún no tienes reservas. <a href="reservas.html" style="color:var(--gold);">Reserva tu primer circuito →</a></p>';
+        return;
+      }
+      const config = window.JACHA_CONFIG || await fetch('/api/config').then(r => r.json()).catch(() => ({}));
+      box.innerHTML = lista.map((r) => {
+        const puedeCancelar = r.estado === 'pendiente' || r.estado === 'confirmado';
+        const wa = J.wa(config.whatsapp_contacto,
+          `Hola Jacha Tours, consulto por mi reserva ${r.codigo} (${r.plan}, ${r.num_personas} persona${r.num_personas > 1 ? 's' : ''}).`);
+        return `
+        <article class="res-item">
+          <div class="res-top">
+            <span class="res-code">${J.esc(r.codigo)}</span>
+            <span class="badge ${J.esc(r.estado)}">${J.esc(r.estado)}</span>
+          </div>
+          <div class="res-meta">
+            <b style="color:var(--text);">${J.esc(r.plan || '—')}</b> · ${r.num_personas} persona${r.num_personas > 1 ? 's' : ''}<br>
+            Fecha preferida: ${r.fecha_preferida ? J.esc(J.fecha(r.fecha_preferida)) : 'por coordinar'}<br>
+            Total estimado: <b style="color:var(--gold);">${J.esc(J.dinero(r.total, r.moneda))}</b><br>
+            Solicitada el ${J.esc(J.fechaHora(r.creado_en))}
+          </div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+            ${wa ? `<a class="btn btn-ghost" style="padding:10px 18px;font-size:.58rem;" href="${wa}" target="_blank" rel="noopener">Escribir por WhatsApp</a>` : ''}
+            ${puedeCancelar ? `<button class="btn btn-ghost" data-cancelar="${r.id}" data-codigo="${J.esc(r.codigo)}" style="padding:10px 18px;font-size:.58rem;">Cancelar reserva</button>` : ''}
+          </div>
+        </article>`;
+      }).join('');
+    } catch (e) { if (!sesionVencida(e)) box.innerHTML = `<p class="f-msg err show">${J.esc(e.message)}</p>`; }
+  }
+
+  $('listaRes').addEventListener('click', async (ev) => {
+    const b = ev.target.closest('[data-cancelar]'); if (!b) return;
+    if (!confirm(`¿Cancelar la reserva ${b.dataset.codigo}?`)) return;
+    b.disabled = true;
+    try {
+      await Auth.api(`/clientes/me/reservas/${b.dataset.cancelar}/cancelar`, { method: 'POST' });
+      aviso('msgRes', 'Reserva cancelada.', true);
+      cargarReservas();
+    } catch (e) { b.disabled = false; if (!sesionVencida(e)) aviso('msgRes', e.message); }
+  });
+
+  $('formPerfil').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const tel = J.normTel($('pTel').value);
+    if ($('pNombre').value.trim().length < 3) return aviso('msgPerfil', 'Escribe tu nombre completo');
+    if (!tel) return aviso('msgPerfil', 'El celular no es válido. Bolivia: 8 dígitos. Otro país: con código (+54...)');
+    $('btnPerfil').disabled = true;
+    try {
+      const d = await Auth.api('/clientes/me', { method: 'PUT', body: JSON.stringify({
+        nombre: $('pNombre').value.trim(), whatsapp: tel, pais: $('pPais').value.trim(), ciudad: $('pCiudad').value.trim() }) });
+      Auth.guardar(d.token, d.cliente);
+      $('saludo').textContent = d.cliente.nombre.split(' ')[0];
+      $('pTel').value = J.verTel(d.cliente.whatsapp);
+      aviso('msgPerfil', 'Datos guardados ✓', true);
+    } catch (err) { if (!sesionVencida(err)) aviso('msgPerfil', err.message); }
+    $('btnPerfil').disabled = false;
+  });
+
+  $('formPass').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nueva = $('cNueva').value;
+    if (nueva.length < 8 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva)) return aviso('msgPass', 'La contraseña debe tener al menos 8 caracteres, con letras y números');
+    $('btnPass').disabled = true;
+    try {
+      await Auth.api('/clientes/me/password', { method: 'POST', body: JSON.stringify({ actual: $('cActual').value, nueva }) });
+      $('cActual').value = ''; $('cNueva').value = '';
+      aviso('msgPass', 'Contraseña actualizada ✓', true);
+    } catch (err) { if (!sesionVencida(err)) aviso('msgPass', err.message); }
+    $('btnPass').disabled = false;
+  });
+
+  $('btnSalir').onclick = () => Auth.cerrarSesion();
+
+  (async () => { perfil = await cargarPerfil(); cargarReservas(); })();
+</script>
+</body>
+</html>

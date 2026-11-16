@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cholets · Admin</title>
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    /* Filtro oscuro sobre los tiles de OSM en el mapa del modal */
+    #editMap .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.7); }
+    #editMap .leaflet-container { background: #0D0B0E; }
+  </style>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <h1 class="page-title">Cholets & Mapa</h1>
+    <p class="page-sub">Administra las ubicaciones y datos de cada cholet</p>
+
+    <div class="toolbar">
+      <button class="btn btn-gold" onclick="openForm()">+ Nuevo Cholet</button>
+      <span style="color:var(--text-dim);font-size:.78rem;">Haz clic en el mapa dentro del formulario para ubicar el cholet</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Nombre</th><th>Categoría</th><th>Zona</th>
+            <th>Lat / Lng</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" style="text-align:center;color:var(--text-dim);">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Nuevo Cholet</div>
+      <button class="modal-close" onclick="closeForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="choletForm">
+        <input type="hidden" id="fId">
+
+        <div class="modal-grid">
+          <div>
+            <label class="form-label">Slug (URL único, sin espacios)</label>
+            <input type="text" id="fSlug" class="form-input" required pattern="[a-z0-9\-]+" placeholder="crucero">
+          </div>
+          <div>
+            <label class="form-label">Nombre</label>
+            <input type="text" id="fNombre" class="form-input" required placeholder="Cholet Crucero">
+          </div>
+          <div>
+            <label class="form-label">Categoría</label>
+            <select id="fCategoria" class="form-input">
+              <option value="cholet">Cholet</option>
+              <option value="interior">Interior / Salón</option>
+              <option value="tour">Punto de Tour</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Arquitecto</label>
+            <input type="text" id="fArquitecto" class="form-input" placeholder="Freddy Mamani">
+          </div>
+          <div>
+            <label class="form-label">Dirección</label>
+            <input type="text" id="fDireccion" class="form-input" placeholder="Av. 6 de Marzo">
+          </div>
+          <div>
+            <label class="form-label">Zona</label>
+            <input type="text" id="fZona" class="form-input" placeholder="Ciudad Satélite">
+          </div>
+          <div>
+            <label class="form-label">Latitud</label>
+            <input type="number" step="any" id="fLat" class="form-input" required>
+          </div>
+          <div>
+            <label class="form-label">Longitud</label>
+            <input type="number" step="any" id="fLng" class="form-input" required>
+          </div>
+          <div class="full">
+            <label class="form-label">Imagen principal (ruta relativa)</label>
+            <input type="text" id="fImagen" class="form-input" placeholder="assets/img/cholets/crucero.jpg">
+          </div>
+          <div class="full">
+            <label class="form-label">Descripción</label>
+            <textarea id="fDescripcion" class="form-input" rows="3" style="resize:vertical;"></textarea>
+          </div>
+          <div>
+            <label class="form-label">Orden (menor = primero)</label>
+            <input type="number" id="fOrden" class="form-input" value="0">
+          </div>
+          <div>
+            <label class="form-label">Estado</label>
+            <select id="fActivo" class="form-input">
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          </div>
+          <div class="full">
+            <label class="form-label">Ubicar en el mapa (clic para mover el pin)</label>
+            <div id="editMap"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:28px;">
+          <button type="button" class="btn btn-ghost" onclick="closeForm()">Cancelar</button>
+          <button type="submit" class="btn btn-gold">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="_shared.js"></script>
+<script>
+
+  let editMap, editMarker, lista = [];
+  const EL_ALTO = [-16.5033, -68.1667];
+
+  function initMap() {
+    if (editMap) return;
+    editMap = L.map('editMap').setView(EL_ALTO, 14);
+
+    // ✅ OpenStreetMap (gratis, sin API key)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(editMap);
+
+    editMap.on('click', (e) => {
+      setMarker(e.latlng.lat, e.latlng.lng);
+    });
+  }
+
+  function setMarker(lat, lng) {
+    document.getElementById('fLat').value = lat.toFixed(7);
+    document.getElementById('fLng').value = lng.toFixed(7);
+    if (editMarker) editMarker.setLatLng([lat, lng]);
+    else {
+      editMarker = L.marker([lat, lng], { draggable: true }).addTo(editMap);
+      editMarker.on('dragend', () => {
+        const p = editMarker.getLatLng();
+        document.getElementById('fLat').value = p.lat.toFixed(7);
+        document.getElementById('fLng').value = p.lng.toFixed(7);
+      });
+    }
+  }
+
+  async function loadCholets() {
+    try {
+      const list = lista = await api('/cholets/all');
+      const tbody = document.getElementById('tbody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-dim);">Sin cholets aún. Crea el primero →</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map(c => `
+        <tr>
+          <td>${c.id}</td>
+          <td><strong>${esc(c.nombre)}</strong><br><small style="color:var(--text-dim);">/${esc(c.slug)}</small></td>
+          <td>${esc(c.categoria)}</td>
+          <td>${esc(c.zona || '—')}</td>
+          <td style="font-family:monospace;font-size:.72rem;">${c.lat}, ${c.lng}</td>
+          <td><span class="badge ${c.activo ? 'activo' : 'inactivo'}">${c.activo ? 'activo' : 'inactivo'}</span></td>
+          <td>
+            <button class="btn btn-ghost btn-sm" data-edit="${c.id}">Editar</button>
+            <button class="btn btn-danger btn-sm" data-del="${c.id}" data-nombre="${esc(c.nombre)}">Borrar</button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) { toast(e.message, true); }
+  }
+
+  function openForm(data) {
+    document.getElementById('modalTitle').textContent = data ? 'Editar Cholet' : 'Nuevo Cholet';
+    document.getElementById('fId').value          = data?.id || '';
+    document.getElementById('fSlug').value        = data?.slug || '';
+    document.getElementById('fNombre').value      = data?.nombre || '';
+    document.getElementById('fCategoria').value   = data?.categoria || 'cholet';
+    document.getElementById('fArquitecto').value  = data?.arquitecto || '';
+    document.getElementById('fDireccion').value   = data?.direccion || '';
+    document.getElementById('fZona').value        = data?.zona || '';
+    document.getElementById('fLat').value         = data?.lat || '';
+    document.getElementById('fLng').value         = data?.lng || '';
+    document.getElementById('fImagen').value      = data?.imagen || '';
+    document.getElementById('fDescripcion').value = data?.descripcion || '';
+    document.getElementById('fOrden').value       = data?.orden ?? 0;
+    document.getElementById('fActivo').value      = String(data?.activo ?? true);
+
+    document.getElementById('modal').classList.add('open');
+    setTimeout(() => {
+      initMap();
+      editMap.invalidateSize();
+      if (data?.lat && data?.lng) {
+        editMap.setView([Number(data.lat), Number(data.lng)], 16);
+        setMarker(Number(data.lat), Number(data.lng));
+      } else {
+        editMap.setView(EL_ALTO, 14);
+        if (editMarker) { editMap.removeLayer(editMarker); editMarker = null; }
+      }
+    }, 100);
+  }
+
+  function closeForm() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  function editCholet(id) {
+    const c = lista.find(x => x.id === id);
+    if (c) openForm(c);
+  }
+
+  async function delCholet(id, nombre) {
+    if (!confirm(`¿Borrar "${nombre}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      await api(`/cholets/${id}`, { method: 'DELETE' });
+      toast('Cholet eliminado');
+      loadCholets();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  document.getElementById('tbody').addEventListener('click', (ev) => {
+    const e = ev.target.closest('[data-edit]');
+    if (e) return editCholet(Number(e.dataset.edit));
+    const d = ev.target.closest('[data-del]');
+    if (d) delCholet(Number(d.dataset.del), d.dataset.nombre);
+  });
+
+  document.getElementById('choletForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('fId').value;
+    const payload = {
+      slug:        document.getElementById('fSlug').value.trim(),
+      nombre:      document.getElementById('fNombre').value.trim(),
+      categoria:   document.getElementById('fCategoria').value,
+      arquitecto:  document.getElementById('fArquitecto').value.trim(),
+      direccion:   document.getElementById('fDireccion').value.trim(),
+      zona:        document.getElementById('fZona').value.trim(),
+      lat:         parseFloat(document.getElementById('fLat').value),
+      lng:         parseFloat(document.getElementById('fLng').value),
+      imagen:      document.getElementById('fImagen').value.trim(),
+      descripcion: document.getElementById('fDescripcion').value.trim(),
+      orden:       parseInt(document.getElementById('fOrden').value || 0, 10),
+      activo:      document.getElementById('fActivo').value === 'true',
+    };
+
+    if (!Number.isFinite(payload.lat) || !Number.isFinite(payload.lng)) return toast('Haz clic en el mapa o escribe latitud y longitud', true);
+    try {
+      if (id) await api(`/cholets/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      else    await api('/cholets',      { method: 'POST', body: JSON.stringify(payload) });
+      toast('Guardado correctamente');
+      closeForm();
+      loadCholets();
+    } catch (e) { toast(e.message, true); }
+  });
+
+  (async () => {
+    try { await requireSession('cholets'); } catch { return; }
+    loadCholets();
+  })();
+</script>
+</body>
+</html>

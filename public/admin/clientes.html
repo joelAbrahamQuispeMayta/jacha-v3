@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes · Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <h1 class="page-title">Clientes</h1>
+    <p class="page-sub">Personas que crearon una cuenta en el sitio</p>
+
+    <div class="filters">
+      <div class="fld"><label for="q">Buscar</label>
+        <input id="q" class="sel" style="min-width:260px;" placeholder="Nombre, correo o celular"></div>
+      <button class="btn btn-ghost" id="btnBuscar">Buscar</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cliente</th><th>Contacto</th><th>Ubicación</th><th>Reservas</th><th>Registro</th><th>Último ingreso</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody"><tr><td colspan="8" style="text-align:center;color:var(--text-dim);">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Clave temporal (se muestra una sola vez) -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header"><div class="modal-title">Clave temporal</div><button class="modal-close" id="cerrar">✕</button></div>
+    <div class="modal-body">
+      <p class="muted" id="modalTxt" style="margin-bottom:16px;"></p>
+      <div style="font-family:monospace;font-size:1.6rem;letter-spacing:.12em;color:var(--gold);background:var(--ink);padding:18px;text-align:center;border:1px dashed var(--gold-line);" id="clave"></div>
+      <p class="muted" style="margin-top:14px;">Envíasela por WhatsApp y pídele que la cambie en <b>Mi cuenta → Cambiar contraseña</b>. No se vuelve a mostrar.</p>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <a class="btn btn-gold btn-sm" id="btnWa" target="_blank" rel="noopener" style="display:none;">Enviar por WhatsApp</a>
+        <button class="btn btn-ghost btn-sm" id="btnCopiar">Copiar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  let datos = [];
+
+  async function cargar() {
+    try {
+      const q = $('q').value.trim();
+      datos = await api('/admin/clientes' + (q ? '?q=' + encodeURIComponent(q) : ''));
+      if (!datos.length) { $('tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-dim);">Sin clientes</td></tr>'; return; }
+      $('tbody').innerHTML = datos.map((c) => {
+        const wa = waLink(c.whatsapp, `Hola ${c.nombre.split(' ')[0]}, te escribimos de Jacha Tours.`);
+        return `
+        <tr>
+          <td><strong>${esc(c.nombre)}</strong></td>
+          <td style="font-size:.76rem;">${wa ? `<a href="${wa}" target="_blank" rel="noopener" style="color:var(--gold);">📱 ${esc(fmtTel(c.whatsapp))}</a>` : esc(c.whatsapp || '')}<br>✉ ${esc(c.email)}</td>
+          <td>${esc([c.ciudad, c.pais].filter(Boolean).join(', ') || '—')}</td>
+          <td>${c.reservas}</td>
+          <td>${fmtDate((c.creado_en || '').slice(0, 10))}</td>
+          <td>${c.ultimo_login ? fmtDateTime(c.ultimo_login) : '—'}</td>
+          <td><span class="badge ${c.activo ? 'activo' : 'inactivo'}">${c.activo ? 'activo' : 'desactivado'}</span></td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-ghost btn-sm" data-reset="${c.id}">Restablecer clave</button>
+            <button class="btn btn-ghost btn-sm" data-toggle="${c.id}" data-activo="${c.activo}">${c.activo ? 'Desactivar' : 'Activar'}</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch (e) { toast(e.message, true); }
+  }
+
+  $('tbody').addEventListener('click', async (ev) => {
+    const r = ev.target.closest('[data-reset]');
+    if (r) {
+      const c = datos.find((x) => String(x.id) === r.dataset.reset);
+      if (!confirm(`¿Generar una clave temporal para ${c.nombre}? Su clave actual dejará de funcionar.`)) return;
+      try {
+        const d = await api(`/admin/clientes/${c.id}/reset-password`, { method: 'POST' });
+        $('modalTxt').textContent = `Nueva clave para ${c.nombre} (${c.email}):`;
+        $('clave').textContent = d.temporal;
+        const wa = waLink(c.whatsapp, `Hola ${c.nombre.split(' ')[0]}, tu clave temporal de Jacha Tours es: ${d.temporal}\nIngresa y cámbiala en "Mi cuenta".`);
+        $('btnWa').style.display = wa ? '' : 'none'; if (wa) $('btnWa').href = wa;
+        $('modal').classList.add('open');
+      } catch (e) { toast(e.message, true); }
+      return;
+    }
+    const t = ev.target.closest('[data-toggle]');
+    if (t) {
+      try {
+        await api(`/admin/clientes/${t.dataset.toggle}/activo`, { method: 'PUT', body: JSON.stringify({ activo: t.dataset.activo !== 'true' }) });
+        toast('Cuenta actualizada ✓'); cargar();
+      } catch (e) { toast(e.message, true); }
+    }
+  });
+
+  $('cerrar').onclick = () => { $('modal').classList.remove('open'); $('clave').textContent = ''; };
+  $('btnCopiar').onclick = async () => { try { await navigator.clipboard.writeText($('clave').textContent); toast('Copiada ✓'); } catch { toast('Cópiala manualmente', true); } };
+  $('btnBuscar').onclick = cargar;
+  $('q').addEventListener('keydown', (e) => { if (e.key === 'Enter') cargar(); });
+
+  (async () => { try { await requireSession('clientes'); } catch { return; } cargar(); })();
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precios & Salida · Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <h1 class="page-title">Precios & Próxima Salida</h1>
+    <p class="page-sub">Los cambios se reflejan al instante en todo el sitio público</p>
+
+    <!-- ══ CONFIG: Próxima Salida ══ -->
+    <section style="margin-bottom:56px;">
+      <h2 class="page-title" style="font-size:1.6rem;margin-bottom:6px;"> Próxima Salida</h2>
+      <p class="page-sub" style="margin-bottom:22px;">Se muestra en el banner "Próxima Salida Confirmada" en todas las páginas</p>
+
+      <div class="table-wrap" style="padding:32px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div>
+            <label class="form-label">Fecha de Salida</label>
+            <input type="date" id="cfgFecha" class="form-input" style="color-scheme:dark;">
+          </div>
+          <div>
+            <label class="form-label">Lugar</label>
+            <input type="text" id="cfgLugar" class="form-input" placeholder="El Alto">
+          </div>
+          <div class="full" style="grid-column:span 2;">
+            <label class="form-label">Texto de Cupos</label>
+            <input type="text" id="cfgCupos" class="form-input" placeholder="Solo quedan 4 cupos disponibles">
+          </div>
+          <div>
+            <label class="form-label">WhatsApp de contacto</label>
+            <input type="text" id="cfgWhatsapp" class="form-input" placeholder="71234567  o  +591 71234567">
+          </div>
+          <div>
+            <label class="form-label">Email de contacto</label>
+            <input type="text" id="cfgEmail" class="form-input" placeholder="hola@jachatours.bo">
+          </div>
+          <div>
+            <label class="form-label">Tipo de cambio referencial (Bs por $us)</label>
+            <input type="number" step="0.01" id="cfgTc" class="form-input" placeholder="6.96">
+          </div>
+        </div>
+        <div style="margin-top:24px;text-align:right;">
+          <button class="btn btn-gold" onclick="guardarConfig()">Guardar Configuración</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PLANES ══ -->
+    <section>
+      <h2 class="page-title" style="font-size:1.6rem;margin-bottom:6px;"> Planes & Precios</h2>
+      <p class="page-sub" style="margin-bottom:22px;">Edita los precios, nombres y descripciones de cada paquete</p>
+
+      <div id="planesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;">
+        <div style="color:var(--text-dim);text-align:center;padding:40px;">Cargando planes…</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+
+  let planesData = [];
+
+  async function loadConfig() {
+    try {
+      const c = await api('/config');
+      document.getElementById('cfgFecha').value   = c.proxima_salida_fecha || '';
+      document.getElementById('cfgLugar').value   = c.proxima_salida_lugar || '';
+      document.getElementById('cfgCupos').value   = c.proxima_salida_cupos || '';
+      document.getElementById('cfgWhatsapp').value = c.whatsapp_contacto || '';
+      document.getElementById('cfgEmail').value    = c.email_contacto || '';
+      document.getElementById('cfgTc').value       = c.tipo_cambio || 6.96;
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function guardarConfig() {
+    const payload = {
+      proxima_salida_fecha: document.getElementById('cfgFecha').value || null,
+      proxima_salida_lugar: document.getElementById('cfgLugar').value.trim() || 'El Alto',
+      proxima_salida_cupos: document.getElementById('cfgCupos').value.trim(),
+      whatsapp_contacto:    document.getElementById('cfgWhatsapp').value.trim(),
+      email_contacto:       document.getElementById('cfgEmail').value.trim(),
+      tipo_cambio:          parseFloat(document.getElementById('cfgTc').value) || 6.96
+    };
+    try {
+      await api('/config', { method: 'PUT', body: JSON.stringify(payload) });
+      toast('Configuración guardada ✓');
+      loadConfig();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function loadPlanes() {
+    try {
+      planesData = await api('/planes/all');
+      const grid = document.getElementById('planesGrid');
+      grid.innerHTML = planesData.map(p => `
+        <div class="table-wrap" style="padding:28px;position:relative;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-size:.58rem;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;font-weight:700;">${esc(p.tier || '')}</div>
+            <span class="badge ${p.activo ? 'activo' : 'inactivo'}">${p.activo ? 'activo' : 'inactivo'}</span>
+          </div>
+
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-input" value="${esc(p.nombre)}" onchange="updPlane(${p.id},'nombre',this.value)" style="margin-bottom:14px;">
+
+          <label class="form-label">Precio (solo número)</label>
+          <input type="number" step="0.01" class="form-input" value="${p.precio}" onchange="updPlane(${p.id},'precio',this.value === '' ? null : parseFloat(this.value))" style="margin-bottom:14px;">
+
+          <label class="form-label">Moneda</label>
+          <input type="text" class="form-input" value="${esc(p.moneda)}" onchange="updPlane(${p.id},'moneda',this.value)" style="margin-bottom:14px;">
+
+          <label class="form-label">Tier / Etiqueta corta</label>
+          <input type="text" class="form-input" value="${esc(p.tier)}" onchange="updPlane(${p.id},'tier',this.value)" style="margin-bottom:14px;">
+
+          <label class="form-label">Características (una por línea)</label>
+          <textarea class="form-input" rows="5" style="resize:vertical;"
+            onchange="updPlane(${p.id},'features',this.value.split('\\n').map(s=>s.trim()).filter(Boolean))"
+          >${esc((p.features || []).join('\n'))}</textarea>
+
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <button class="btn btn-gold btn-sm" style="flex:1;" onclick="togglePlane(${p.id},${!p.activo})">${p.activo ? 'Desactivar' : 'Activar'}</button>
+          </div>
+
+          <div style="margin-top:12px;font-size:.68rem;color:var(--text-dim);">
+            Vista previa:
+            <div id="prev-${p.id}" style="margin-top:6px;font-family:'Cormorant',serif;font-size:2rem;color:var(--gold);">
+              ${esc(money(p.precio, p.moneda))}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) { toast(e.message, true); }
+  }
+
+  async function updPlane(id, field, value) {
+    const p = planesData.find(x => x.id === id);
+    if (!p) return;
+    try {
+      const nuevo = await api(`/planes/${id}`, { method: 'PUT', body: JSON.stringify({ [field]: value }) });
+      Object.assign(p, nuevo);
+      const prev = document.getElementById('prev-' + id);
+      if (prev) prev.textContent = money(p.precio, p.moneda);
+      toast('Actualizado ✓');
+    } catch (e) { toast(e.message, true); loadPlanes(); }   // si falla, vuelve a mostrar el valor real
+  }
+
+  async function togglePlane(id, activo) {
+    try {
+      await api(`/planes/${id}`, { method: 'PUT', body: JSON.stringify({ activo }) });
+      loadPlanes();
+    } catch (e) { toast(e.message, true); }
+  }
+
+  (async () => {
+    try { await requireSession('planes'); } catch { return; }
+    loadConfig();
+    loadPlanes();
+  })();
+</script>
+</body>
+</html>

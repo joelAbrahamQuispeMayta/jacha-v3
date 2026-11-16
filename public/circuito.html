@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circuito de Cholets · JACHA TOURS</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .info-band { background: var(--surface); border-top: 1px solid var(--gold-line); border-bottom: 1px solid var(--gold-line); display: grid; grid-template-columns: repeat(4,1fr); }
+    .info-cell { padding: 34px 28px; border-right: 1px solid var(--gold-line); display: flex; align-items: center; gap: 16px; }
+    .info-cell:last-child { border-right: none; }
+    .info-icon { width: 44px; height: 44px; border: 1px solid var(--gold-line); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 1.1rem; flex-shrink: 0; }
+    .info-cell-lbl { font-size: .58rem; color: var(--gold); letter-spacing: .2em; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+    .info-cell-val { font-size: .88rem; }
+
+    .timeline { position: relative; padding-left: 60px; }
+    .timeline::before { content:''; position:absolute; left:22px; top:0; bottom:0; width:1px; background:linear-gradient(to bottom,var(--gold),rgba(201,168,76,.1)); }
+    .timeline-item { position:relative; margin-bottom:52px; }
+    .timeline-item:last-child { margin-bottom:0; }
+    .timeline-dot { position:absolute; left:-60px; top:0; width:44px; height:44px; background:var(--surface); border:1.5px solid var(--gold-line); display:flex; align-items:center; justify-content:center; font-family:'Cormorant',serif; font-size:1.1rem; color:var(--gold); font-weight:600; transition:var(--tr); z-index:1; }
+    .timeline-item:hover .timeline-dot { background:var(--gold); color:var(--black); border-color:var(--gold); }
+    .timeline-card { background:var(--surface); border:1px solid var(--gold-line); display:grid; grid-template-columns:1fr 320px; overflow:hidden; transition:var(--tr); }
+    .timeline-item:hover .timeline-card { border-color:rgba(201,168,76,.45); box-shadow:0 20px 48px rgba(0,0,0,.5); }
+    .timeline-info { padding:42px; }
+    .timeline-type { font-size:.58rem; color:var(--gold); letter-spacing:.26em; text-transform:uppercase; font-weight:600; margin-bottom:10px; }
+    .timeline-name { font-family:'Cormorant',serif; font-size:2rem; font-weight:400; margin-bottom:14px; }
+    .timeline-desc { color:var(--text-dim); font-size:.87rem; line-height:1.85; margin-bottom:22px; }
+    .tags { display:flex; flex-wrap:wrap; gap:8px; }
+    .tag { font-size:.58rem; color:var(--gold); border:1px solid var(--gold-line); padding:5px 13px; letter-spacing:.12em; text-transform:uppercase; }
+    .timeline-img { height:100%; min-height:220px; overflow:hidden; }
+    .timeline-img img { width:100%; height:100%; object-fit:cover; filter:brightness(.8); transition:transform .8s var(--ease),filter .4s; }
+    .timeline-item:hover .timeline-img img { transform:scale(1.06); filter:brightness(.95); }
+
+    .itin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-top:56px; }
+    .itin-cell { background:var(--surface); padding:38px 32px; border:1px solid var(--gold-line); position:relative; overflow:hidden; transition:var(--tr); }
+    .itin-cell:hover { background:var(--panel); border-color:rgba(201,168,76,.4); transform:translateY(-4px); }
+    .itin-time { font-family:'Cormorant',serif; font-size:2.2rem; color:var(--gold); font-weight:600; line-height:1; margin-bottom:8px; }
+    .itin-name { font-weight:600; font-size:.92rem; margin-bottom:8px; }
+    .itin-desc { font-size:.82rem; color:var(--text-dim); line-height:1.75; }
+    .itin-n { position:absolute; bottom:-8px; right:14px; font-family:'Cormorant',serif; font-size:5.5rem; color:rgba(201,168,76,.05); font-weight:700; line-height:1; pointer-events:none; }
+
+    .map-cta { position:relative; min-height:55vh; display:flex; align-items:center; justify-content:center; overflow:hidden; text-align:center; background:var(--surface); }
+    .map-grid-bg { position:absolute; inset:0; background-image:linear-gradient(rgba(201,168,76,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.055) 1px,transparent 1px); background-size:64px 64px; }
+    .map-cta-content { position:relative; z-index:1; padding:80px 5vw; }
+    .map-cta-content h2 { font-family:'Cormorant',serif; font-size:clamp(2.5rem,5vw,4rem); font-weight:300; margin:14px 0 20px; }
+    .map-cta-content h2 em { font-style:italic; color:var(--gold-bright); }
+    .map-cta-content p { color:var(--text-dim); font-size:.9rem; max-width:480px; margin:0 auto 36px; line-height:1.9; }
+    .location-chip { display:inline-flex; align-items:center; gap:10px; border:1px solid var(--gold-line); padding:11px 22px; color:var(--gold); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; margin-bottom:36px; background:rgba(201,168,76,.05); }
+
+    @media(max-width:900px) {
+      .info-band { grid-template-columns:repeat(2,1fr); }
+      .info-cell:nth-child(2){ border-right:none; }
+      .timeline-card { grid-template-columns:1fr; }
+      .timeline-img { min-height:220px; }
+      .itin-grid { grid-template-columns:1fr; }
+      .timeline { padding-left:44px; }
+      .timeline::before { left:16px; }
+      .timeline-dot { left:-44px; }
+    }
+    @media(max-width:640px){ .info-band { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="cursor-glow" id="cg"></div>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">JACHA<span class="nav-logo-sep"> · </span>TOURS</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="circuito.html" class="active">Circuito</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="experiencia.html">Experiencias</a>
+      <a href="reservas.html">Reservas</a>
+    </div>
+    <a href="reservas.html" class="btn btn-gold" style="padding:10px 24px;font-size:.62rem;">Reservar</a>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">Inicio</a>
+  <a href="circuito.html">Circuito</a>
+  <a href="mapa.html">Mapa</a>
+  <a href="experiencia.html">Experiencias</a>
+  <a href="reservas.html">Reservas</a>
+  <a href="reservas.html" class="btn btn-gold" style="width:fit-content;margin-top:8px;">Reservar Ahora</a>
+</div>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-vid-wrap">
+    <video id="heroVid" autoplay muted loop playsinline poster="assets/img/cholets/ingenio.jpg">
+      <source src="assets/videos/circuito.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-line-bottom"></div>
+  <div class="hero-content">
+    <p class="eyebrow label-line" style="margin-bottom:22px;">El Alto, Bolivia</p>
+    <h1 class="hero-title">
+      <span class="line-wrap"><span class="line-inner">El Circuito</span></span>
+      <span class="line-wrap"><span class="line-inner">de los <em>Cholets</em></span></span>
+      <span class="line-wrap"><span class="line-inner">Legendarios</span></span>
+    </h1>
+    <p class="hero-sub">Un recorrido único por los edificios más audaces del altiplano boliviano. Arquitectura que desafía toda convención.</p>
+    <div class="hero-actions">
+      <a href="#paradas" class="btn btn-gold">Ver Paradas →</a>
+      <a href="reservas.html" class="btn btn-ghost">Reservar Tour</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ INFO BAND ══ -->
+<div class="info-band">
+  <div class="info-cell">
+    <div class="info-icon">⏱</div>
+    <div><div class="info-cell-lbl">Duración</div><div class="info-cell-val">4 – 8 horas</div></div>
+  </div>
+  <div class="info-cell">
+    <div class="info-icon">📍</div>
+    <div><div class="info-cell-lbl">Ubicación</div><div class="info-cell-val">El Alto, Bolivia</div></div>
+  </div>
+  <div class="info-cell">
+    <div class="info-icon">🏛</div>
+    <div><div class="info-cell-lbl">Paradas</div><div class="info-cell-val">5 – 12 Cholets</div></div>
+  </div>
+  <div class="info-cell">
+    <div class="info-icon">🌐</div>
+    <div><div class="info-cell-lbl">Idiomas</div><div class="info-cell-val">Español · Inglés</div></div>
+  </div>
+</div>
+
+<!-- ══ PARADAS ══ -->
+<section class="section" id="paradas">
+  <div class="section-head" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;">
+    <div class="reveal">
+      <p class="eyebrow label-line">Recorrido</p>
+      <h2 class="section-title">Las <em>Paradas</em><br>del Circuito</h2>
+    </div>
+    <a href="mapa.html" class="btn btn-ghost reveal">Ver en el Mapa →</a>
+  </div>
+
+  <div class="timeline">
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot">01</div>
+      <div class="timeline-card">
+        <div class="timeline-info">
+          <div class="timeline-type">Exterior · Fachada Icónica</div>
+          <div class="timeline-name">Cholet Crucero</div>
+          <p class="timeline-desc">El cholet más fotografiado de El Alto. Su diseño náutico-andino fusiona la forma de un crucero trasatlántico con colores y símbolos de la cosmovisión aymara.</p>
+          <div class="tags"><span class="tag">Fachada</span><span class="tag">Fotografía</span><span class="tag">Historia</span></div>
+        </div>
+        <div class="timeline-img"><img src="assets/img/cholets/crucero.jpg" alt="Cholet Crucero"></div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot">02</div>
+      <div class="timeline-card">
+        <div class="timeline-info">
+          <div class="timeline-type">Exterior + Interior · Freddy Mamani</div>
+          <div class="timeline-name">The Transformer</div>
+          <p class="timeline-desc">Diseñado por el maestro Freddy Mamani Silvestre. Fachadas en colores vibrantes y salones interiores repletos de espejos y detalles dorados que deleitan todos los sentidos.</p>
+          <div class="tags"><span class="tag">Freddy Mamani</span><span class="tag">Interior</span><span class="tag">Arte</span></div>
+        </div>
+        <div class="timeline-img"><img src="assets/img/cholets/transformer.jpg" alt="The Transformer"></div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot">03</div>
+      <div class="timeline-card">
+        <div class="timeline-info">
+          <div class="timeline-type">Gala · Salón Principal</div>
+          <div class="timeline-name">Salón Cóndor</div>
+          <p class="timeline-desc">El interior más opulento del circuito. Pan de oro, arabescos geométricos y una iluminación teatral crean un ambiente de lujo ancestral sin comparación.</p>
+          <div class="tags"><span class="tag">Pan de Oro</span><span class="tag">Gala</span><span class="tag">Lujo</span></div>
+        </div>
+        <div class="timeline-img"><img src="assets/img/interiores/salon-gala.jpg" alt="Salón Cóndor"></div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot">04</div>
+      <div class="timeline-card">
+        <div class="timeline-info">
+          <div class="timeline-type">Tour Completo · VIP</div>
+          <div class="timeline-name">Cholet Titanic</div>
+          <p class="timeline-desc">Desde las cocinas industriales hasta los penthouses privados, el Titanic es la experiencia más completa y significativa del circuito Neoandino.</p>
+          <div class="tags"><span class="tag">VIP</span><span class="tag">Penthouse</span><span class="tag">Cocinas</span></div>
+        </div>
+        <div class="timeline-img"><img src="assets/img/cholets/titanic.jpg" alt="Cholet Titanic"></div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot">05</div>
+      <div class="timeline-card">
+        <div class="timeline-info">
+          <div class="timeline-type">Gastronomía · Cierre del Circuito</div>
+          <div class="timeline-name">El Ingenio</div>
+          <p class="timeline-desc">Un almuerzo gourmet en los salones del Ingenio como cierre perfecto del circuito. Arte neoandino fusionado con la gastronomía boliviana de alta cocina.</p>
+          <div class="tags"><span class="tag">Gastronomía</span><span class="tag">Gold+</span><span class="tag">Almuerzo</span></div>
+        </div>
+        <div class="timeline-img"><img src="assets/img/cholets/ingenio.jpg" alt="El Ingenio"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ ITINERARIO ══ -->
+<section class="section section-dark">
+  <div class="section-head reveal">
+    <p class="eyebrow label-line">Programa del Día</p>
+    <h2 class="section-title">Itinerario <em>Típico</em></h2>
+    <p class="section-sub">El recorrido varía según el paquete seleccionado. A continuación, un día típico del tour Aurum Gold.</p>
+  </div>
+  <div class="itin-grid">
+    <div class="itin-cell reveal"><div class="itin-time">08:30</div><div class="itin-name">Punto de Encuentro</div><p class="itin-desc">Recogida en su hotel en La Paz. Presentación del equipo y bienvenida oficial.</p><div class="itin-n">01</div></div>
+    <div class="itin-cell reveal reveal-delay-1"><div class="itin-time">09:30</div><div class="itin-name">Llegada a El Alto</div><p class="itin-desc">Primera parada: Cholet Crucero. Sesión fotográfica y explicación histórica.</p><div class="itin-n">02</div></div>
+    <div class="itin-cell reveal reveal-delay-2"><div class="itin-time">11:00</div><div class="itin-name">Recorrido por Fachadas</div><p class="itin-desc">Visita a 4–6 fachadas icónicas con guía especializado en arquitectura Neoandina.</p><div class="itin-n">03</div></div>
+    <div class="itin-cell reveal"><div class="itin-time">13:00</div><div class="itin-name">Almuerzo Gourmet</div><p class="itin-desc">Almuerzo en El Ingenio. Cocina boliviana de alta calidad en entorno neoandino.</p><div class="itin-n">04</div></div>
+    <div class="itin-cell reveal reveal-delay-1"><div class="itin-time">14:30</div><div class="itin-name">Interiores Exclusivos</div><p class="itin-desc">Acceso especial a salones de gala, cocinas industriales y espacios privados.</p><div class="itin-n">05</div></div>
+    <div class="itin-cell reveal reveal-delay-2"><div class="itin-time">16:30</div><div class="itin-name">Regreso y Despedida</div><p class="itin-desc">Traslado de vuelta. Se comparten materiales digitales y audioguías de recuerdo.</p><div class="itin-n">06</div></div>
+  </div>
+</section>
+
+<!-- ══ MAP CTA ══ -->
+<div class="map-cta">
+  <div class="map-grid-bg"></div>
+  <div class="map-cta-content reveal">
+    <p class="eyebrow" style="justify-content:center;display:flex;gap:14px;margin-bottom:0;">
+      <span style="width:28px;height:1px;background:var(--gold);display:inline-block;align-self:center;"></span>
+      Ubicación
+      <span style="width:28px;height:1px;background:var(--gold);display:inline-block;align-self:center;"></span>
+    </p>
+    <h2>El Alto, <em>Bolivia</em></h2>
+    <div class="location-chip">📍 4.150 m.s.n.m. · El Alto, La Paz</div>
+    <p>A 15 minutos de La Paz, El Alto es la ciudad más alta del mundo y hogar de la arquitectura Neoandina más espectacular del planeta.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <a href="mapa.html" class="btn btn-gold">Ver Mapa Completo →</a>
+      <a href="reservas.html" class="btn btn-ghost">Reservar mi Tour</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOOKING BAND ══ -->
+<div class="booking-band reveal">
+  <div>
+    <div class="booking-date-label"><span class="pulse-dot"></span> Próxima Salida Confirmada</div>
+    <div class="booking-date" data-config="fecha">15 Junio, 2026</div>
+    <div class="booking-slots" data-config="cupos">Solo quedan 4 cupos disponibles · El Alto</div>
+  </div>
+  <a href="reservas.html" class="btn btn-gold" style="padding:20px 52px;font-size:.75rem;">Asegurar mi Lugar →</a>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">JACHA TOURS</div><p class="footer-tagline">Experiencias de lujo en la capital mundial de la arquitectura Neoandina.</p></div>
+    <div class="footer-col"><h5>Navegación</h5><a href="index.html">Inicio</a><a href="circuito.html">Circuito</a><a href="mapa.html">Mapa</a><a href="experiencia.html">Experiencias</a><a href="reservas.html">Reservas</a></div>
+    <div class="footer-col"><h5>Paquetes</h5><a href="reservas.html">Blue Silver</a><a href="reservas.html">Aurum Gold</a><a href="reservas.html">Platinum VIP</a></div>
+    <div class="footer-col"><h5>Contacto</h5><p>El Alto, Bolivia</p><p data-config="whatsapp">+591 7X XXX XXXX</p><p data-config="email">hola@jachatours.bo</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Jacha Tours Bolivia · Todos los derechos reservados</p>
+    <p>Arquitectura Neoandina · El Alto · Bolivia</p>
+  </div>
+</footer>
+
+<script>
+  const cg=document.getElementById('cg');
+  window.addEventListener('mousemove',e=>{cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';});
+  const nav=document.getElementById('nav');
+  window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60),{passive:true});
+  const toggle=document.getElementById('navToggle'),drawer=document.getElementById('navDrawer');
+  toggle.addEventListener('click',()=>{toggle.classList.toggle('open');drawer.classList.toggle('open');});
+  document.getElementById('heroVid').addEventListener('canplay',function(){this.classList.add('loaded');});
+  const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');ro.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+</script>
+<script src="assets/common.js"></script>
+<script src="assets/dynamic.js"></script>
+</body>
+</html>

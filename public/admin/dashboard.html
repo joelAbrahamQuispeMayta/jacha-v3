@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · JACHA TOURS Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <h1 class="page-title">Bienvenido, <span id="userName" style="color:var(--gold);">admin</span></h1>
+    <p class="page-sub">Resumen general de la actividad</p>
+
+    <div class="dash-grid">
+      <div class="dash-card"><div class="dash-num" id="dReservas">—</div><div class="dash-lbl">Reservas totales</div></div>
+      <div class="dash-card"><div class="dash-num" id="dPendientes">—</div><div class="dash-lbl">Pendientes por confirmar</div></div>
+      <div class="dash-card"><div class="dash-num" id="dConfirmadas">—</div><div class="dash-lbl">Confirmadas</div></div>
+      <div class="dash-card"><div class="dash-num" id="dIngresos" style="font-size:2.2rem;">—</div><div class="dash-lbl">Ingresos confirmados</div></div>
+      <div class="dash-card"><div class="dash-num" id="dClientes">—</div><div class="dash-lbl">Clientes con cuenta</div></div>
+      <div class="dash-card"><div class="dash-num" id="dCholets">—</div><div class="dash-lbl">Cholets activos</div></div>
+    </div>
+
+    <div class="row2">
+      <div class="card-pad">
+        <h3>Reservas por mes</h3>
+        <div class="bars" id="bars"><span class="muted">Cargando…</span></div>
+      </div>
+      <div class="card-pad">
+        <h3>Seguridad · Cambiar contraseña</h3>
+        <form id="formPass">
+          <div class="form-group" style="margin-bottom:16px;"><label class="form-label" for="pActual">Contraseña actual</label>
+            <input type="password" id="pActual" class="form-input" autocomplete="current-password" required></div>
+          <div class="form-group" style="margin-bottom:16px;"><label class="form-label" for="pNueva">Nueva contraseña</label>
+            <input type="password" id="pNueva" class="form-input" autocomplete="new-password" placeholder="Mínimo 8, con letras y números" required></div>
+          <button class="btn btn-gold btn-sm" type="submit">Actualizar</button>
+        </form>
+      </div>
+    </div>
+
+    <h2 class="page-title" style="font-size:1.6rem;margin-top:8px;">Últimas reservas</h2>
+    <div class="table-wrap" style="margin-top:16px;">
+      <table>
+        <thead><tr><th>Código</th><th>Fecha</th><th>Cliente</th><th>Plan</th><th>Pers.</th><th>Total</th><th>Estado</th></tr></thead>
+        <tbody id="recentBody"><tr><td colspan="7" style="text-align:center;color:var(--text-dim);">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="_shared.js"></script>
+<script>
+  (async () => {
+    try { await requireSession('dashboard'); } catch { return; }
+    try {
+      const s = await api('/admin/stats');
+      const $ = (id) => document.getElementById(id);
+      $('dReservas').textContent = s.reservas.total;
+      $('dPendientes').textContent = s.reservas.pendientes;
+      $('dConfirmadas').textContent = s.reservas.confirmadas;
+      $('dIngresos').textContent = money(s.reservas.ingresos_confirmados);
+      $('dClientes').textContent = s.clientes.total;
+      $('dCholets').textContent = `${s.cholets.activos} / ${s.cholets.total}`;
+
+      // Gráfico simple: últimos 6 meses (rellena los meses sin reservas con 0)
+      const mapa = Object.fromEntries(s.por_mes.map((m) => [m.mes, m.reservas]));
+      const hoy = new Date(); const meses = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        meses.push({ k, etq: MESES[d.getMonth()], n: mapa[k] || 0 });
+      }
+      const max = Math.max(1, ...meses.map((m) => m.n));
+      $('bars').innerHTML = meses.map((m) =>
+        `<div class="bar"><b>${m.n}</b><i style="height:${Math.round((m.n / max) * 100)}%"></i><span>${m.etq}</span></div>`).join('');
+
+      $('recentBody').innerHTML = s.recientes.length ? s.recientes.map((r) => `
+        <tr>
+          <td><code>${esc(r.codigo)}</code></td>
+          <td>${fmtDateTime(r.creado_en)}</td>
+          <td>${esc(r.nombre_cliente)}</td>
+          <td>${esc(r.plan || '—')}</td>
+          <td>${r.num_personas}</td>
+          <td>${r.total != null ? money(r.total, r.moneda) : '—'}</td>
+          <td><span class="badge ${esc(r.estado)}">${esc(r.estado)}</span></td>
+        </tr>`).join('')
+        : '<tr><td colspan="7" style="text-align:center;color:var(--text-dim);">Sin reservas aún</td></tr>';
+    } catch (e) { toast(e.message, true); }
+  })();
+
+  document.getElementById('formPass').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nueva = document.getElementById('pNueva').value;
+    if (nueva.length < 8 || !/[A-Za-z]/.test(nueva) || !/\d/.test(nueva)) return toast('La contraseña debe tener 8+ caracteres, con letras y números', true);
+    try {
+      await api('/auth/password', { method: 'POST', body: JSON.stringify({ actual: document.getElementById('pActual').value, nueva }) });
+      toast('Contraseña actualizada ✓');
+      e.target.reset();
+    } catch (err) { toast(err.message, true); }
+  });
+</script>
+</body>
+</html>

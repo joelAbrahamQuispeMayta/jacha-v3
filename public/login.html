@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ingresar · JACHA TOURS</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="cursor-glow" id="cg"></div>
+<nav class="nav scrolled" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">JACHA<span class="nav-logo-sep"> · </span>TOURS</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="circuito.html">Circuito</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="experiencia.html">Experiencias</a>
+      <a href="reservas.html">Reservas</a>
+    </div>
+    <a href="#planes" class="btn btn-gold" style="padding:10px 24px;font-size:.62rem;">Reservar Ahora</a>
+    <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-drawer" id="navDrawer">
+  <a href="index.html">Inicio</a>
+  <a href="circuito.html">Circuito</a>
+  <a href="mapa.html">Mapa</a>
+  <a href="experiencia.html">Experiencias</a>
+  <a href="reservas.html">Reservas</a>
+  <a href="#planes" class="btn btn-gold" style="width:fit-content;margin-top:8px;">Reservar Ahora</a>
+</div>
+
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="auth-title" id="titulo">Bienvenido</h1>
+    <p class="auth-sub" id="sub">Ingresa para ver y gestionar tus reservas.</p>
+
+    <div class="auth-tabs" role="tablist">
+      <button type="button" id="tabIn" class="on" role="tab">Ingresar</button>
+      <button type="button" id="tabReg" role="tab">Crear cuenta</button>
+    </div>
+
+    <div class="f-msg err" id="msg" role="alert"></div>
+
+    <!-- INGRESAR -->
+    <form id="formIn" novalidate>
+      <div class="f-group">
+        <label class="f-label" for="inEmail">Correo electrónico</label>
+        <input class="f-input" id="inEmail" type="email" autocomplete="email" placeholder="correo@ejemplo.com" required>
+      </div>
+      <div class="f-group">
+        <label class="f-label" for="inPass">Contraseña</label>
+        <input class="f-input" id="inPass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      </div>
+      <button class="btn btn-gold btn-block" id="btnIn" type="submit">Ingresar →</button>
+      <p class="auth-foot">¿Olvidaste tu contraseña? <a data-config="whatsapp-link" href="#">Escríbenos por WhatsApp</a> y la restablecemos.</p>
+    </form>
+
+    <!-- CREAR CUENTA -->
+    <form id="formReg" novalidate style="display:none;">
+      <div class="f-group">
+        <label class="f-label" for="rNombre">Nombre completo</label>
+        <input class="f-input" id="rNombre" type="text" autocomplete="name" maxlength="120" placeholder="Como figura en tu documento" required>
+      </div>
+      <div class="f-group">
+        <label class="f-label" for="rEmail">Correo electrónico</label>
+        <input class="f-input" id="rEmail" type="email" autocomplete="email" placeholder="correo@ejemplo.com" required>
+      </div>
+      <div class="f-group">
+        <label class="f-label" for="rTel">Celular / WhatsApp</label>
+        <input class="f-input" id="rTel" type="tel" autocomplete="tel" placeholder="7XXXXXXX" required>
+        <span class="f-hint">Bolivia: 8 dígitos (ej. 71234567). Otro país: con código, ej. +54 9 11 5555 1234</span>
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <label class="f-label" for="rPais">País</label>
+          <input class="f-input" id="rPais" type="text" value="Bolivia" maxlength="60" list="paises">
+          <datalist id="paises"><option>Bolivia</option><option>Argentina</option><option>Brasil</option><option>Chile</option><option>Perú</option><option>Paraguay</option><option>Colombia</option><option>España</option><option>Estados Unidos</option></datalist>
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="rCiudad">Ciudad</label>
+          <input class="f-input" id="rCiudad" type="text" maxlength="80" list="ciudades" placeholder="El Alto">
+          <datalist id="ciudades"><option>El Alto</option><option>La Paz</option><option>Cochabamba</option><option>Santa Cruz de la Sierra</option><option>Sucre</option><option>Oruro</option><option>Potosí</option><option>Tarija</option><option>Trinidad</option><option>Cobija</option></datalist>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label" for="rPass">Contraseña</label>
+        <input class="f-input" id="rPass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres, con letras y números" required>
+      </div>
+      <button class="btn btn-gold btn-block" id="btnReg" type="submit">Crear mi cuenta →</button>
+      <p class="auth-foot">Con tu cuenta ves el estado de tus reservas y las repites en un clic.<br>
+        También puedes <a href="reservas.html">reservar sin cuenta</a>.</p>
+    </form>
+
+    <p class="auth-foot" style="margin-top:30px;border-top:1px solid var(--gold-line);padding-top:20px;">
+      ¿Eres parte del equipo de Jacha Tours? <a href="admin/login.html">Panel de administración →</a>
+    </p>
+  </div>
+</main>
+<footer class="footer">
+  <div class="footer-grid">
+    <div><div class="footer-logo">JACHA TOURS</div><p class="footer-tagline">Experiencias de lujo en la capital mundial de la arquitectura Neoandina.</p></div>
+    <div class="footer-col"><h5>Navegación</h5><a href="index.html">Inicio</a><a href="circuito.html">Circuito</a><a href="mapa.html">Mapa</a><a href="experiencia.html">Experiencias</a><a href="reservas.html">Reservas</a></div>
+    <div class="footer-col"><h5>Paquetes</h5><a href="reservas.html">Blue Silver</a><a href="reservas.html">Aurum Gold</a><a href="reservas.html">Platinum VIP</a></div>
+    <div class="footer-col"><h5>Contacto</h5><p>El Alto, Bolivia</p><p data-config="whatsapp">+591 7X XXX XXXX</p><p data-config="email">hola@jachatours.bo</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Jacha Tours Bolivia · Todos los derechos reservados</p>
+    <p>Arquitectura Neoandina · El Alto · Bolivia</p>
+  </div>
+</footer>
+<script>
+  const cg=document.getElementById('cg');
+  window.addEventListener('mousemove',e=>{cg.style.left=e.clientX+'px';cg.style.top=e.clientY+'px';});
+  const toggle=document.getElementById('navToggle'),drawer=document.getElementById('navDrawer');
+  toggle.addEventListener('click',()=>{toggle.classList.toggle('open');drawer.classList.toggle('open');});
+</script>
+
+<script src="assets/common.js"></script>
+<script src="assets/dynamic.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const J = window.Jacha, Auth = window.JachaAuth;
+
+  // A dónde volver después de ingresar (solo páginas internas del sitio)
+  const next = (() => {
+    const n = new URLSearchParams(location.search).get('next') || '';
+    return /^[a-z0-9-]+\.html$/i.test(n) ? n : 'mi-cuenta.html';
+  })();
+  if (Auth.logueado()) location.replace(next);
+
+  function mostrar(tab) {
+    const reg = tab === 'reg';
+    $('formIn').style.display = reg ? 'none' : '';
+    $('formReg').style.display = reg ? '' : 'none';
+    $('tabIn').classList.toggle('on', !reg);
+    $('tabReg').classList.toggle('on', reg);
+    $('titulo').textContent = reg ? 'Crea tu cuenta' : 'Bienvenido';
+    $('sub').textContent = reg ? 'Toma menos de un minuto.' : 'Ingresa para ver y gestionar tus reservas.';
+    error('');
+  }
+  function error(t) { const m = $('msg'); m.textContent = t; m.classList.toggle('show', !!t); }
+  $('tabIn').onclick = () => mostrar('in');
+  $('tabReg').onclick = () => mostrar('reg');
+  if (location.hash === '#registro') mostrar('reg');
+
+  async function enviar(btn, ruta, cuerpo) {
+    btn.disabled = true; error('');
+    try {
+      const d = await Auth.api(ruta, { method: 'POST', body: JSON.stringify(cuerpo) });
+      Auth.guardar(d.token, d.cliente);
+      location.href = next;
+    } catch (e) { error(e.message); btn.disabled = false; }
+  }
+
+  $('formIn').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = $('inEmail').value.trim(), password = $('inPass').value;
+    if (!email || !password) return error('Escribe tu correo y contraseña');
+    enviar($('btnIn'), '/clientes/login', { email, password });
+  });
+
+  $('formReg').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nombre = $('rNombre').value.trim(), email = $('rEmail').value.trim();
+    const tel = J.normTel($('rTel').value), password = $('rPass').value;
+    if (nombre.length < 3) return error('Escribe tu nombre completo');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return error('El correo no es válido');
+    if (!tel) return error('El celular no es válido. Bolivia: 8 dígitos (ej. 71234567). Otro país: con código (+54...)');
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) return error('La contraseña debe tener al menos 8 caracteres, con letras y números');
+    enviar($('btnReg'), '/clientes/registro', {
+      nombre, email, whatsapp: tel, password,
+      pais: $('rPais').value.trim() || 'Bolivia', ciudad: $('rCiudad').value.trim(),
+    });
+  });
+
+  // Enlace de "olvidé mi contraseña" con el WhatsApp configurado
+  fetch('/api/config').then(r => r.json()).then(c => {
+    const href = J.wa(c.whatsapp_contacto, 'Hola, olvidé mi contraseña de Jacha Tours. Mi correo es: ');
+    document.querySelectorAll('[data-config="whatsapp-link"]').forEach(a => { if (href) { a.href = href; a.target = '_blank'; a.rel = 'noopener'; } });
+  }).catch(() => {});
+</script>
+</body>
+</html>
